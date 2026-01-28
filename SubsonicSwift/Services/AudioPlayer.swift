@@ -214,7 +214,7 @@ final class AudioPlayer: ObservableObject {
                 if let (data, _) = try? await URLSession.shared.data(from: coverURL),
                    let image = UIImage(data: data) {
                     await MainActor.run {
-                        var updatedInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? info
+                        var updatedInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
                         updatedInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
                         MPNowPlayingInfoCenter.default().nowPlayingInfo = updatedInfo
                     }
