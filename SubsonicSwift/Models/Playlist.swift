@@ -1,6 +1,6 @@
 import Foundation
 
-struct Playlist: Codable, Identifiable, Hashable {
+struct Playlist: Identifiable, Hashable {
     let id: String
     let name: String
     let comment: String?
@@ -12,20 +12,20 @@ struct Playlist: Codable, Identifiable, Hashable {
     let coverArt: String?
     var songs: [Song]?
 
-    enum CodingKeys: String, CodingKey {
-        case id, name, comment, owner, songCount, duration, created, changed, coverArt
-        case songs = "entry"
+    init?(from data: [String: Any]) {
+        guard let id = data["id"] as? String,
+              let name = data["name"] as? String else {
+            return nil
+        }
+        self.id = id
+        self.name = name
+        self.comment = data["comment"] as? String
+        self.owner = data["owner"] as? String
+        self.songCount = data["songCount"] as? Int
+        self.duration = data["duration"] as? Int
+        self.created = data["created"] as? String
+        self.changed = data["changed"] as? String
+        self.coverArt = data["coverArt"] as? String
+        self.songs = (data["entry"] as? [[String: Any]])?.compactMap { Song(from: $0) }
     }
-}
-
-struct PlaylistsResponse: Codable {
-    let playlists: PlaylistsContainer
-
-    struct PlaylistsContainer: Codable {
-        let playlist: [Playlist]?
-    }
-}
-
-struct PlaylistResponse: Codable {
-    let playlist: Playlist
 }

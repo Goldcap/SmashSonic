@@ -29,7 +29,7 @@ final class SubsonicClient: ObservableObject {
         return url.appendingQueryItems(params)
     }
 
-    private func request<T: Codable>(_ endpoint: String, params: [String: String] = [:]) async throws -> T {
+    private func fetchData(endpoint: String, params: [String: String] = [:]) async throws -> [String: Any] {
         guard let url = buildURL(endpoint: endpoint, additionalParams: params) else {
             throw SubsonicError.invalidURL
         }
@@ -44,26 +44,28 @@ final class SubsonicClient: ObservableObject {
             throw SubsonicError.httpError(httpResponse.statusCode)
         }
 
-        let wrapper = try JSONDecoder().decode(SubsonicResponse<T>.self, from: data)
-
-        if let error = wrapper.subsonicResponse.error {
-            throw SubsonicError.apiError(error.code, error.message)
+        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+              let subsonicResponse = json["subsonic-response"] as? [String: Any] else {
+            throw SubsonicError.invalidResponse
         }
 
-        guard let result = wrapper.subsonicResponse.result else {
-            if T.self == EmptyResponse.self {
-                return EmptyResponse() as! T
-            }
-            throw SubsonicError.emptyResponse
+        if let error = subsonicResponse["error"] as? [String: Any],
+           let code = error["code"] as? Int,
+           let message = error["message"] as? String {
+            throw SubsonicError.apiError(code, message)
         }
 
-        return result
+        guard subsonicResponse["status"] as? String == "ok" else {
+            throw SubsonicError.invalidResponse
+        }
+
+        return subsonicResponse
     }
 
     // MARK: - API Methods
 
     func ping() async throws -> Bool {
-        let _: EmptyResponse = try await request("ping")
+        _ = try await fetchData(endpoint: "ping")
         return true
     }
 
@@ -79,47 +81,99 @@ final class SubsonicClient: ObservableObject {
     }
 
     func getArtists() async throws -> [Artist] {
-        let response: ArtistsResponse = try await request("getArtists")
-        return response.artists.index?.flatMap { $0.artist ?? [] } ?? []
+        let response = try await fetchData(endpoint: "getArtists")
+
+        guard let artists = response["artists"] as? [String: Any],
+              let index = artists["index"] as? [[String: Any]] else {
+            return []
+        }
+
+        var result: [Artist] = []
+        for section in index {
+            if let artistList = section["artist"] as? [[String: Any]] {
+                for artistData in artistList {
+                    if let artist = Artist(from: artistData) {
+                        result.append(artist)
+                    }
+                }
+            }
+        }
+        return result
     }
 
-    func getArtist(id: String) async throws -> ArtistResponse.ArtistDetail {
-        let response: ArtistResponse = try await request("getArtist", params: ["id": id])
-        return response.artist
+    func getArtist(id: String) async throws -> ArtistDetail {
+        let response = try await fetchData(endpoint: "getArtist", params: ["id": id])
+
+        guard let artistData = response["artist"] as? [String: Any] else {
+            throw SubsonicError.emptyResponse
+        }
+
+        return ArtistDetail(from: artistData)
     }
 
     func getAlbum(id: String) async throws -> Album {
-        let response: AlbumResponse = try await request("getAlbum", params: ["id": id])
-        return response.album
+        let response = try await fetchData(endpoint: "getAlbum", params: ["id": id])
+
+        guard let albumData = response["album"] as? [String: Any],
+              let album = Album(from: albumData) else {
+            throw SubsonicError.emptyResponse
+        }
+
+        return album
     }
 
     func getAlbumList(type: AlbumListType = .alphabeticalByName, size: Int = 50, offset: Int = 0) async throws -> [Album] {
-        let response: AlbumListResponse = try await request("getAlbumList2", params: [
+        let response = try await fetchData(endpoint: "getAlbumList2", params: [
             "type": type.rawValue,
             "size": String(size),
             "offset": String(offset)
         ])
-        return response.albumList2.album ?? []
+
+        guard let albumList = response["albumList2"] as? [String: Any],
+              let albums = albumList["album"] as? [[String: Any]] else {
+            return []
+        }
+
+        return albums.compactMap { Album(from: $0) }
     }
 
     func search(query: String, artistCount: Int = 20, albumCount: Int = 20, songCount: Int = 50) async throws -> SearchResult {
-        let response: SearchResponse = try await request("search3", params: [
+        let response = try await fetchData(endpoint: "search3", params: [
             "query": query,
             "artistCount": String(artistCount),
             "albumCount": String(albumCount),
             "songCount": String(songCount)
         ])
-        return response.searchResult3
+
+        let searchResult = response["searchResult3"] as? [String: Any] ?? [:]
+
+        let artists = (searchResult["artist"] as? [[String: Any]])?.compactMap { Artist(from: $0) } ?? []
+        let albums = (searchResult["album"] as? [[String: Any]])?.compactMap { Album(from: $0) } ?? []
+        let songs = (searchResult["song"] as? [[String: Any]])?.compactMap { Song(from: $0) } ?? []
+
+        return SearchResult(artist: artists, album: albums, song: songs)
     }
 
     func getPlaylists() async throws -> [Playlist] {
-        let response: PlaylistsResponse = try await request("getPlaylists")
-        return response.playlists.playlist ?? []
+        let response = try await fetchData(endpoint: "getPlaylists")
+
+        guard let playlists = response["playlists"] as? [String: Any],
+              let playlistList = playlists["playlist"] as? [[String: Any]] else {
+            return []
+        }
+
+        return playlistList.compactMap { Playlist(from: $0) }
     }
 
     func getPlaylist(id: String) async throws -> Playlist {
-        let response: PlaylistResponse = try await request("getPlaylist", params: ["id": id])
-        return response.playlist
+        let response = try await fetchData(endpoint: "getPlaylist", params: ["id": id])
+
+        guard let playlistData = response["playlist"] as? [String: Any],
+              let playlist = Playlist(from: playlistData) else {
+            throw SubsonicError.emptyResponse
+        }
+
+        return playlist
     }
 
     // MARK: - URL Builders
@@ -143,55 +197,26 @@ final class SubsonicClient: ObservableObject {
 
 // MARK: - Response Types
 
-struct SubsonicResponse<T: Codable>: Codable {
-    let subsonicResponse: SubsonicResponseContent<T>
+struct ArtistDetail {
+    let id: String
+    let name: String
+    let albumCount: Int?
+    let coverArt: String?
+    let albums: [Album]
 
-    enum CodingKeys: String, CodingKey {
-        case subsonicResponse = "subsonic-response"
-    }
-
-    struct SubsonicResponseContent<R: Codable>: Codable {
-        let status: String
-        let version: String
-        let error: SubsonicError.APIError?
-
-        var result: R? {
-            try? container.decode(R.self)
-        }
-
-        private let container: SingleValueDecodingContainer
-
-        init(from decoder: Decoder) throws {
-            let keyedContainer = try decoder.container(keyedBy: CodingKeys.self)
-            self.status = try keyedContainer.decode(String.self, forKey: .status)
-            self.version = try keyedContainer.decode(String.self, forKey: .version)
-            self.error = try keyedContainer.decodeIfPresent(SubsonicError.APIError.self, forKey: .error)
-            self.container = try decoder.singleValueContainer()
-        }
-
-        func encode(to encoder: Encoder) throws {
-            var container = encoder.container(keyedBy: CodingKeys.self)
-            try container.encode(status, forKey: .status)
-            try container.encode(version, forKey: .version)
-            try container.encodeIfPresent(error, forKey: .error)
-        }
-
-        enum CodingKeys: String, CodingKey {
-            case status, version, error
-        }
+    init(from data: [String: Any]) {
+        self.id = data["id"] as? String ?? ""
+        self.name = data["name"] as? String ?? ""
+        self.albumCount = data["albumCount"] as? Int
+        self.coverArt = data["coverArt"] as? String
+        self.albums = (data["album"] as? [[String: Any]])?.compactMap { Album(from: $0) } ?? []
     }
 }
 
-struct EmptyResponse: Codable {}
-
-struct SearchResponse: Codable {
-    let searchResult3: SearchResult
-}
-
-struct SearchResult: Codable {
-    let artist: [Artist]?
-    let album: [Album]?
-    let song: [Song]?
+struct SearchResult {
+    let artist: [Artist]
+    let album: [Album]
+    let song: [Song]
 }
 
 enum AlbumListType: String {
@@ -214,11 +239,6 @@ enum SubsonicError: LocalizedError {
     case httpError(Int)
     case apiError(Int, String)
     case emptyResponse
-
-    struct APIError: Codable {
-        let code: Int
-        let message: String
-    }
 
     var errorDescription: String? {
         switch self {

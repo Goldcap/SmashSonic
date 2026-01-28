@@ -35,7 +35,7 @@ final class LibraryViewModel: ObservableObject {
         isLoading = false
     }
 
-    func loadArtist(id: String) async -> ArtistResponse.ArtistDetail? {
+    func loadArtist(id: String) async -> ArtistDetail? {
         do {
             return try await client.getArtist(id: id)
         } catch {

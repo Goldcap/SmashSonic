@@ -74,12 +74,12 @@ struct ArtistRow: View {
 struct ArtistDetailView: View {
     let artist: Artist
     @ObservedObject var viewModel: LibraryViewModel
-    @State private var artistDetail: ArtistResponse.ArtistDetail?
+    @State private var artistDetail: ArtistDetail?
 
     var body: some View {
         ScrollView {
             LazyVStack(spacing: 0) {
-                if let albums = artistDetail?.album {
+                if let albums = artistDetail?.albums {
                     ForEach(albums) { album in
                         NavigationLink(destination: AlbumDetailView(album: album)) {
                             AlbumRow(album: album)

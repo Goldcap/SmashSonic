@@ -1,6 +1,6 @@
 import Foundation
 
-struct Song: Codable, Identifiable, Hashable {
+struct Song: Identifiable, Hashable {
     let id: String
     let title: String
     let album: String?
@@ -16,9 +16,42 @@ struct Song: Codable, Identifiable, Hashable {
     let contentType: String?
     let path: String?
 
-    enum CodingKeys: String, CodingKey {
-        case id, title, album, albumId, artist, artistId, track, duration
-        case coverArt, suffix, bitRate, size, contentType, path
+    init?(from data: [String: Any]) {
+        guard let id = data["id"] as? String,
+              let title = data["title"] as? String else {
+            return nil
+        }
+        self.id = id
+        self.title = title
+        self.album = data["album"] as? String
+        self.albumId = data["albumId"] as? String
+        self.artist = data["artist"] as? String
+        self.artistId = data["artistId"] as? String
+        self.track = data["track"] as? Int
+        self.duration = data["duration"] as? Int
+        self.coverArt = data["coverArt"] as? String
+        self.suffix = data["suffix"] as? String
+        self.bitRate = data["bitRate"] as? Int
+        self.size = data["size"] as? Int
+        self.contentType = data["contentType"] as? String
+        self.path = data["path"] as? String
+    }
+
+    init(id: String, title: String, album: String?, albumId: String?, artist: String?, artistId: String?, track: Int?, duration: Int?, coverArt: String?, suffix: String?, bitRate: Int?, size: Int?, contentType: String?, path: String?) {
+        self.id = id
+        self.title = title
+        self.album = album
+        self.albumId = albumId
+        self.artist = artist
+        self.artistId = artistId
+        self.track = track
+        self.duration = duration
+        self.coverArt = coverArt
+        self.suffix = suffix
+        self.bitRate = bitRate
+        self.size = size
+        self.contentType = contentType
+        self.path = path
     }
 
     var formattedDuration: String {
