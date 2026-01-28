@@ -47,7 +47,7 @@ struct SongListItem: View {
                 Text(song.title)
                     .font(.body)
                     .lineLimit(1)
-                    .foregroundStyle(playerViewModel.currentSong?.id == song.id ? .accentColor : .primary)
+                    .foregroundColor(playerViewModel.currentSong?.id == song.id ? .accentColor : .primary)
 
                 HStack(spacing: 4) {
                     if let artist = song.artist {

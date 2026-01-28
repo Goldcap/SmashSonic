@@ -131,7 +131,7 @@ struct SongRow: View {
                 Text(song.title)
                     .font(.body)
                     .lineLimit(1)
-                    .foregroundStyle(playerViewModel.currentSong?.id == song.id ? .accentColor : .primary)
+                    .foregroundColor(playerViewModel.currentSong?.id == song.id ? .accentColor : .primary)
 
                 if let artist = song.artist {
                     Text(artist)
