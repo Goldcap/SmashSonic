@@ -164,7 +164,7 @@ struct SongRow: View {
 
                 if downloadsViewModel.isDownloaded(song.id) {
                     Button(role: .destructive) {
-                        downloadsViewModel.downloadManager.deleteDownload(song.id)
+                        downloadsViewModel.deleteDownload(song.id)
                     } label: {
                         Label("Remove Download", systemImage: "trash")
                     }

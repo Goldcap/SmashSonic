@@ -41,6 +41,10 @@ final class DownloadsViewModel: ObservableObject {
         loadDownloads(context: context)
     }
 
+    func deleteDownload(_ songId: String) {
+        downloadManager.deleteDownload(songId)
+    }
+
     func isDownloaded(_ songId: String) -> Bool {
         downloadManager.isDownloaded(songId)
     }
