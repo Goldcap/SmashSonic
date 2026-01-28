@@ -146,6 +146,10 @@ final class SubsonicClient: ObservableObject {
 struct SubsonicResponse<T: Codable>: Codable {
     let subsonicResponse: SubsonicResponseContent<T>
 
+    enum CodingKeys: String, CodingKey {
+        case subsonicResponse = "subsonic-response"
+    }
+
     struct SubsonicResponseContent<R: Codable>: Codable {
         let status: String
         let version: String
