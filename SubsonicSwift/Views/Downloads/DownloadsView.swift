@@ -169,7 +169,7 @@ struct DownloadedSongRow: View {
                 Text(downloaded.title)
                     .font(.body)
                     .lineLimit(1)
-                    .foregroundStyle(isPlaying ? .accentColor : .primary)
+                    .foregroundColor(isPlaying ? .accentColor : .primary)
 
                 HStack(spacing: 4) {
                     if let artist = downloaded.artist {
