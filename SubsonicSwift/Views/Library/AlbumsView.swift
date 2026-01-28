@@ -1,0 +1,138 @@
+import SwiftUI
+
+struct AlbumsView: View {
+    @ObservedObject var viewModel: LibraryViewModel
+
+    let columns = [
+        GridItem(.adaptive(minimum: 150), spacing: 16)
+    ]
+
+    var body: some View {
+        Group {
+            if viewModel.isLoading && viewModel.albums.isEmpty {
+                ProgressView("Loading albums...")
+            } else if let error = viewModel.error, viewModel.albums.isEmpty {
+                ContentUnavailableView {
+                    Label("Error", systemImage: "exclamationmark.triangle")
+                } description: {
+                    Text(error)
+                } actions: {
+                    Button("Retry") {
+                        Task { await viewModel.loadAlbums() }
+                    }
+                }
+            } else if viewModel.albums.isEmpty {
+                ContentUnavailableView("No Albums", systemImage: "square.stack", description: Text("Your library is empty"))
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 20) {
+                        ForEach(viewModel.albums) { album in
+                            NavigationLink(destination: AlbumDetailView(album: album)) {
+                                AlbumCard(album: album)
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
+                    .padding()
+                }
+                .refreshable {
+                    await viewModel.loadAlbums()
+                }
+            }
+        }
+        .task {
+            if viewModel.albums.isEmpty {
+                await viewModel.loadAlbums()
+            }
+        }
+    }
+}
+
+struct AlbumCard: View {
+    let album: Album
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            AsyncImage(url: album.coverArt.flatMap { SubsonicClient.shared.coverArtURL(for: $0, size: 300) }) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.2))
+                    .overlay {
+                        Image(systemName: "music.note")
+                            .font(.largeTitle)
+                            .foregroundStyle(.secondary)
+                    }
+            }
+            .frame(minWidth: 0, maxWidth: .infinity)
+            .aspectRatio(1, contentMode: .fit)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(album.name)
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .lineLimit(1)
+
+                if let artist = album.artist {
+                    Text(artist)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
+            }
+        }
+    }
+}
+
+struct AlbumRow: View {
+    let album: Album
+
+    var body: some View {
+        HStack(spacing: 12) {
+            AsyncImage(url: album.coverArt.flatMap { SubsonicClient.shared.coverArtURL(for: $0, size: 100) }) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Rectangle()
+                    .fill(Color.secondary.opacity(0.2))
+                    .overlay {
+                        Image(systemName: "music.note")
+                            .foregroundStyle(.secondary)
+                    }
+            }
+            .frame(width: 60, height: 60)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(album.name)
+                    .font(.body)
+                    .lineLimit(1)
+
+                HStack(spacing: 4) {
+                    if let year = album.year {
+                        Text(String(year))
+                    }
+                    if album.year != nil && album.songCount != nil {
+                        Text("·")
+                    }
+                    if let songCount = album.songCount {
+                        Text("\(songCount) tracks")
+                    }
+                }
+                .font(.caption)
+                .foregroundStyle(.secondary)
+            }
+
+            Spacer()
+
+            Image(systemName: "chevron.right")
+                .font(.caption)
+                .foregroundStyle(.tertiary)
+        }
+        .padding()
+    }
+}
