@@ -10,19 +10,40 @@ struct AlbumsView: View {
     var body: some View {
         Group {
             if viewModel.isLoading && viewModel.albums.isEmpty {
-                ProgressView("Loading albums...")
+                VStack {
+                    ProgressView("Loading albums...")
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, 50)
             } else if let error = viewModel.error, viewModel.albums.isEmpty {
-                ContentUnavailableView {
-                    Label("Error", systemImage: "exclamationmark.triangle")
-                } description: {
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundStyle(.secondary)
                     Text(error)
-                } actions: {
+                        .foregroundStyle(.secondary)
                     Button("Retry") {
                         Task { await viewModel.loadAlbums() }
                     }
+                    .buttonStyle(.bordered)
+                    Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, 50)
             } else if viewModel.albums.isEmpty {
-                ContentUnavailableView("No Albums", systemImage: "square.stack", description: Text("Your library is empty"))
+                VStack(spacing: 12) {
+                    Image(systemName: "square.stack")
+                        .font(.largeTitle)
+                        .foregroundStyle(.secondary)
+                    Text("No Albums")
+                        .font(.headline)
+                    Text("Your library is empty")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, 50)
             } else {
                 ScrollView {
                     LazyVGrid(columns: columns, spacing: 20) {

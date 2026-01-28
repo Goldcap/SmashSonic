@@ -6,19 +6,40 @@ struct ArtistsView: View {
     var body: some View {
         Group {
             if viewModel.isLoading && viewModel.artists.isEmpty {
-                ProgressView("Loading artists...")
+                VStack {
+                    ProgressView("Loading artists...")
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, 50)
             } else if let error = viewModel.error, viewModel.artists.isEmpty {
-                ContentUnavailableView {
-                    Label("Error", systemImage: "exclamationmark.triangle")
-                } description: {
+                VStack(spacing: 12) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .font(.largeTitle)
+                        .foregroundStyle(.secondary)
                     Text(error)
-                } actions: {
+                        .foregroundStyle(.secondary)
                     Button("Retry") {
                         Task { await viewModel.loadArtists() }
                     }
+                    .buttonStyle(.bordered)
+                    Spacer()
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, 50)
             } else if viewModel.artists.isEmpty {
-                ContentUnavailableView("No Artists", systemImage: "music.mic", description: Text("Your library is empty"))
+                VStack(spacing: 12) {
+                    Image(systemName: "music.mic")
+                        .font(.largeTitle)
+                        .foregroundStyle(.secondary)
+                    Text("No Artists")
+                        .font(.headline)
+                    Text("Your library is empty")
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .padding(.top, 50)
             } else {
                 List(viewModel.artists) { artist in
                     NavigationLink(destination: ArtistDetailView(artist: artist, viewModel: viewModel)) {
