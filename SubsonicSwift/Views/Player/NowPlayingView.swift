@@ -38,13 +38,7 @@ struct NowPlayingView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 } placeholder: {
-                    Rectangle()
-                        .fill(Color.secondary.opacity(0.3))
-                        .overlay {
-                            Image(systemName: "music.note")
-                                .font(.system(size: 80))
-                                .foregroundStyle(.white.opacity(0.5))
-                        }
+                    PlaceholderArtView()
                 }
                 .frame(width: 300, height: 300)
                 .clipShape(RoundedRectangle(cornerRadius: 12))

@@ -79,13 +79,7 @@ struct AlbumCard: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.2))
-                    .overlay {
-                        Image(systemName: "music.note")
-                            .font(.largeTitle)
-                            .foregroundStyle(.secondary)
-                    }
+                PlaceholderArtView()
             }
             .frame(minWidth: 0, maxWidth: .infinity)
             .aspectRatio(1, contentMode: .fit)
@@ -118,12 +112,7 @@ struct AlbumRow: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.2))
-                    .overlay {
-                        Image(systemName: "music.note")
-                            .foregroundStyle(.secondary)
-                    }
+                PlaceholderArtView()
             }
             .frame(width: 60, height: 60)
             .clipShape(RoundedRectangle(cornerRadius: 6))

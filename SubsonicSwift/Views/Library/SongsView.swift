@@ -32,12 +32,7 @@ struct SongListItem: View {
                         .resizable()
                         .aspectRatio(contentMode: .fill)
                 } placeholder: {
-                    Rectangle()
-                        .fill(Color.secondary.opacity(0.2))
-                        .overlay {
-                            Image(systemName: "music.note")
-                                .foregroundStyle(.secondary)
-                        }
+                    PlaceholderArtView()
                 }
                 .frame(width: 50, height: 50)
                 .clipShape(RoundedRectangle(cornerRadius: 4))

@@ -4,32 +4,44 @@ struct SearchView: View {
     @ObservedObject var viewModel: SearchViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject private var downloadsViewModel = DownloadsViewModel()
+    @FocusState private var isSearchFocused: Bool
 
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 // Search Bar
                 HStack {
-                    Image(systemName: "magnifyingglass")
-                        .foregroundStyle(.secondary)
+                    HStack {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(.secondary)
 
-                    TextField("Artists, albums, or songs", text: $viewModel.query)
-                        .textFieldStyle(.plain)
-                        .autocorrectionDisabled()
-                        .textInputAutocapitalization(.never)
+                        TextField("Artists, albums, or songs", text: $viewModel.query)
+                            .textFieldStyle(.plain)
+                            .autocorrectionDisabled()
+                            .textInputAutocapitalization(.never)
+                            .focused($isSearchFocused)
 
-                    if !viewModel.query.isEmpty {
-                        Button {
-                            viewModel.query = ""
-                        } label: {
-                            Image(systemName: "xmark.circle.fill")
-                                .foregroundStyle(.secondary)
+                        if !viewModel.query.isEmpty {
+                            Button {
+                                viewModel.query = ""
+                            } label: {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundStyle(.secondary)
+                            }
                         }
                     }
+                    .padding(12)
+                    .background(Color.secondary.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+
+                    if isSearchFocused {
+                        Button("Cancel") {
+                            isSearchFocused = false
+                        }
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
+                    }
                 }
-                .padding(12)
-                .background(Color.secondary.opacity(0.1))
-                .clipShape(RoundedRectangle(cornerRadius: 10))
+                .animation(.easeInOut(duration: 0.2), value: isSearchFocused)
                 .padding()
 
                 // Results
@@ -96,6 +108,7 @@ struct SearchView: View {
                         }
                         .padding(.vertical)
                     }
+                    .scrollDismissesKeyboard(.interactively)
                 } else if !viewModel.hasSearched {
                     Spacer()
                     VStack(spacing: 12) {
@@ -108,6 +121,10 @@ struct SearchView: View {
                     }
                     Spacer()
                 }
+            }
+            .contentShape(Rectangle())
+            .onTapGesture {
+                isSearchFocused = false
             }
             .navigationTitle("Search")
         }
@@ -167,13 +184,7 @@ struct SearchAlbumCard: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.2))
-                    .overlay {
-                        Image(systemName: "music.note")
-                            .font(.title)
-                            .foregroundStyle(.secondary)
-                    }
+                PlaceholderArtView()
             }
             .frame(width: 140, height: 140)
             .clipShape(RoundedRectangle(cornerRadius: 8))

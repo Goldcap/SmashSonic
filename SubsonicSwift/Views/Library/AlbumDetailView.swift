@@ -11,6 +11,26 @@ struct AlbumDetailView: View {
         loadedAlbum ?? album
     }
 
+    var sortedSongs: [Song] {
+        displayAlbum.songs?.sorted { song1, song2 in
+            // Sort by track number first (nil values go last)
+            switch (song1.track, song2.track) {
+            case let (track1?, track2?):
+                if track1 != track2 {
+                    return track1 < track2
+                }
+            case (nil, _?):
+                return false
+            case (_?, nil):
+                return true
+            case (nil, nil):
+                break
+            }
+            // Then sort by title
+            return song1.title.localizedCaseInsensitiveCompare(song2.title) == .orderedAscending
+        } ?? []
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
@@ -21,13 +41,7 @@ struct AlbumDetailView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                     } placeholder: {
-                        Rectangle()
-                            .fill(Color.secondary.opacity(0.2))
-                            .overlay {
-                                Image(systemName: "music.note")
-                                    .font(.system(size: 60))
-                                    .foregroundStyle(.secondary)
-                            }
+                        PlaceholderArtView()
                     }
                     .frame(width: 250, height: 250)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -63,10 +77,10 @@ struct AlbumDetailView: View {
                     }
 
                     // Play Button
-                    if let songs = displayAlbum.songs, !songs.isEmpty {
+                    if !sortedSongs.isEmpty {
                         HStack(spacing: 12) {
                             Button {
-                                playerViewModel.play(songs[0], queue: songs)
+                                playerViewModel.play(sortedSongs[0], queue: sortedSongs)
                             } label: {
                                 Label("Play", systemImage: "play.fill")
                                     .font(.headline)
@@ -76,7 +90,7 @@ struct AlbumDetailView: View {
                             .buttonStyle(.borderedProminent)
 
                             Button {
-                                let shuffled = songs.shuffled()
+                                let shuffled = sortedSongs.shuffled()
                                 playerViewModel.play(shuffled[0], queue: shuffled)
                             } label: {
                                 Label("Shuffle", systemImage: "shuffle")
@@ -92,11 +106,11 @@ struct AlbumDetailView: View {
                 .padding()
 
                 // Track List
-                if let songs = displayAlbum.songs {
+                if !sortedSongs.isEmpty {
                     Divider()
                     LazyVStack(spacing: 0) {
-                        ForEach(songs) { song in
-                            SongRow(song: song, songs: songs, showTrackNumber: true, downloadsViewModel: downloadsViewModel)
+                        ForEach(sortedSongs) { song in
+                            SongRow(song: song, songs: sortedSongs, showTrackNumber: true, downloadsViewModel: downloadsViewModel)
                             Divider()
                         }
                     }

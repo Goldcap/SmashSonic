@@ -221,13 +221,7 @@ struct HomeAlbumCard: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.2))
-                    .overlay {
-                        Image(systemName: "music.note")
-                            .font(.title)
-                            .foregroundStyle(.secondary)
-                    }
+                PlaceholderArtView()
             }
             .frame(width: 150, height: 150)
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -288,12 +282,7 @@ struct PlaylistRow: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.2))
-                    .overlay {
-                        Image(systemName: "music.note.list")
-                            .foregroundStyle(.secondary)
-                    }
+                PlaceholderArtView()
             }
             .frame(width: 56, height: 56)
             .clipShape(RoundedRectangle(cornerRadius: 6))
@@ -344,13 +333,7 @@ struct PlaylistDetailView: View {
                             .resizable()
                             .aspectRatio(contentMode: .fill)
                     } placeholder: {
-                        Rectangle()
-                            .fill(Color.secondary.opacity(0.2))
-                            .overlay {
-                                Image(systemName: "music.note.list")
-                                    .font(.system(size: 60))
-                                    .foregroundStyle(.secondary)
-                            }
+                        PlaceholderArtView()
                     }
                     .frame(width: 200, height: 200)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -442,12 +425,7 @@ struct PlaylistSongRow: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
             } placeholder: {
-                Rectangle()
-                    .fill(Color.secondary.opacity(0.2))
-                    .overlay {
-                        Image(systemName: "music.note")
-                            .foregroundStyle(.secondary)
-                    }
+                PlaceholderArtView()
             }
             .frame(width: 44, height: 44)
             .clipShape(RoundedRectangle(cornerRadius: 4))
