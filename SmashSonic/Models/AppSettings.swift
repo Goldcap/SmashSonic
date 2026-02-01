@@ -11,7 +11,7 @@ enum BackgroundType: String, CaseIterable, Codable {
     case solidNavy = "solidNavy"
     case solidPurple = "solidPurple"
     case solidForest = "solidForest"
-    case solidBurgundy = "solidBurgundy"
+    case solidMagenta = "solidMagenta"
 
     // Pixel art backgrounds
     case stars = "stars"
@@ -27,7 +27,7 @@ enum BackgroundType: String, CaseIterable, Codable {
         case .solidNavy: return "Navy"
         case .solidPurple: return "Purple"
         case .solidForest: return "Forest"
-        case .solidBurgundy: return "Burgundy"
+        case .solidMagenta: return "Magenta"
         case .stars: return "8-Bit Stars"
         case .notes: return "8-Bit Notes"
         case .grid: return "Retro Grid"
@@ -37,7 +37,7 @@ enum BackgroundType: String, CaseIterable, Codable {
 
     var imageName: String? {
         switch self {
-        case .none, .solidBlack, .solidDarkGray, .solidNavy, .solidPurple, .solidForest, .solidBurgundy:
+        case .none, .solidBlack, .solidDarkGray, .solidNavy, .solidPurple, .solidForest, .solidMagenta:
             return nil
         case .stars: return "Background8BitStars"
         case .notes: return "Background8BitNotes"
@@ -53,7 +53,7 @@ enum BackgroundType: String, CaseIterable, Codable {
         case .solidNavy: return Color(red: 0.1, green: 0.1, blue: 0.3)
         case .solidPurple: return Color(red: 0.2, green: 0.1, blue: 0.3)
         case .solidForest: return Color(red: 0.05, green: 0.2, blue: 0.1)
-        case .solidBurgundy: return Color.magenta
+        case .solidMagenta: return Color(red: 1.0, green: 0.0, blue: 1.0)
         default: return nil
         }
     }
@@ -67,7 +67,7 @@ enum BackgroundType: String, CaseIterable, Codable {
     }
 
     static var solidColors: [BackgroundType] {
-        [.solidBlack, .solidDarkGray, .solidNavy, .solidPurple, .solidForest, .solidBurgundy]
+        [.solidBlack, .solidDarkGray, .solidNavy, .solidPurple, .solidForest, .solidMagenta]
     }
 
     static var pixelArtBackgrounds: [BackgroundType] {
