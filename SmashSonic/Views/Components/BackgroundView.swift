@@ -4,19 +4,18 @@ struct BackgroundView: View {
     @ObservedObject private var settingsManager = SettingsManager.shared
 
     var body: some View {
-        GeometryReader { geometry in
-            if let imageName = settingsManager.backgroundType.imageName {
+        Group {
+            if let color = settingsManager.backgroundType.solidColor {
+                color
+            } else if let imageName = settingsManager.backgroundType.imageName {
                 Image(imageName)
                     .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: geometry.size.width, height: geometry.size.height)
-                    .clipped()
+                    .scaledToFill()
                     .opacity(0.3)
-            } else if let color = settingsManager.backgroundType.solidColor {
-                color
+            } else {
+                Color.clear
             }
         }
-        .ignoresSafeArea()
     }
 }
 

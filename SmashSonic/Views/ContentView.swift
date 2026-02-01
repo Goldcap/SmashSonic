@@ -12,6 +12,11 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            // Background layer - uses Color.clear to establish size, then overlays the actual background
+            Color.clear
+                .overlay(BackgroundView())
+                .ignoresSafeArea()
+
             TabView(selection: $selectedTab) {
                 HomeView(viewModel: libraryViewModel)
                     .tabItem {
@@ -46,6 +51,7 @@ struct ContentView: View {
                     .tag(4)
             }
             .scrollContentBackground(.hidden)
+            .toolbarBackground(.hidden, for: .tabBar)
 
             if playerViewModel.currentSong != nil {
                 VStack(spacing: 0) {
@@ -53,9 +59,6 @@ struct ContentView: View {
                         .padding(.bottom, 49)
                 }
             }
-        }
-        .background {
-            BackgroundView()
         }
         .sheet(isPresented: $playerViewModel.showFullPlayer) {
             NowPlayingView()
