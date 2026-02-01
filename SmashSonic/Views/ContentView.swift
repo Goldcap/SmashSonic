@@ -12,9 +12,6 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // App background
-            BackgroundView()
-
             TabView(selection: $selectedTab) {
                 HomeView(viewModel: libraryViewModel)
                     .tabItem {
@@ -56,6 +53,9 @@ struct ContentView: View {
                         .padding(.bottom, 49)
                 }
             }
+        }
+        .background {
+            BackgroundView()
         }
         .sheet(isPresented: $playerViewModel.showFullPlayer) {
             NowPlayingView()
