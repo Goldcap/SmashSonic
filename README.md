@@ -1,4 +1,4 @@
-# SubsonicSwift
+# SmashSonic
 
 A native SwiftUI iOS app for streaming music from a Subsonic server.
 
@@ -22,7 +22,7 @@ A native SwiftUI iOS app for streaming music from a Subsonic server.
 
 ## Installation
 
-1. Open `SubsonicSwift.xcodeproj` in Xcode
+1. Open `SmashSonic.xcodeproj` in Xcode
 2. Select your development team in Signing & Capabilities
 3. Connect your iPhone
 4. Select your device as the build target
@@ -45,8 +45,8 @@ A native SwiftUI iOS app for streaming music from a Subsonic server.
 ## Project Structure
 
 ```
-SubsonicSwift/
-├── SubsonicSwiftApp.swift      # App entry point
+SmashSonic/
+├── SmashSonicApp.swift         # App entry point
 ├── Models/                     # Data models
 │   ├── Artist.swift
 │   ├── Album.swift

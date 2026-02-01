@@ -2,7 +2,7 @@ import SwiftUI
 import SwiftData
 
 @main
-struct SubsonicSwiftApp: App {
+struct SmashSonicApp: App {
     @StateObject private var playerViewModel = PlayerViewModel()
     @State private var launchScreenFinished = false
 
