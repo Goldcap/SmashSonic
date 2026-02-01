@@ -77,37 +77,49 @@ struct AlbumDetailView: View {
                         .foregroundStyle(.tertiary)
                     }
 
-                    // Play Button
+                    // Play/Shuffle/Download Buttons
                     if !sortedSongs.isEmpty {
                         HStack(spacing: 12) {
-                            PixelActionButton(
-                                title: "Play",
-                                icon: "PixelPlay",
-                                style: .primary
-                            ) {
+                            Button {
                                 playerViewModel.play(sortedSongs[0], queue: sortedSongs)
+                            } label: {
+                                Image("PixelPlayButton")
+                                    .renderingMode(.original)
+                                    .resizable()
+                                    .interpolation(.none)
+                                    .scaledToFit()
+                                    .frame(height: 44)
                             }
+                            .buttonStyle(.plain)
 
-                            PixelActionButton(
-                                title: "Shuffle",
-                                icon: "PixelShuffle",
-                                style: .secondary
-                            ) {
+                            Button {
                                 let shuffled = sortedSongs.shuffled()
                                 playerViewModel.play(shuffled[0], queue: shuffled)
+                            } label: {
+                                Image("PixelShuffleButton")
+                                    .renderingMode(.original)
+                                    .resizable()
+                                    .interpolation(.none)
+                                    .scaledToFit()
+                                    .frame(height: 44)
                             }
+                            .buttonStyle(.plain)
 
-                            PixelActionButton(
-                                title: nil,
-                                icon: "PixelDownload",
-                                style: .secondary
-                            ) {
+                            Button {
                                 for song in sortedSongs {
                                     if !downloadsViewModel.isDownloaded(song.id) && !downloadsViewModel.isDownloading(song.id) {
                                         downloadsViewModel.download(song)
                                     }
                                 }
+                            } label: {
+                                Image("PixelDownloadButton")
+                                    .renderingMode(.original)
+                                    .resizable()
+                                    .interpolation(.none)
+                                    .scaledToFit()
+                                    .frame(height: 44)
                             }
+                            .buttonStyle(.plain)
                         }
                         .padding(.horizontal)
                     }
