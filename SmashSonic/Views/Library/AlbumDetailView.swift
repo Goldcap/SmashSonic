@@ -143,7 +143,7 @@ struct AlbumDetailView: View {
         .background(backgroundView.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
         .task {
             loadedAlbum = await viewModel.loadAlbum(id: album.id)
         }
