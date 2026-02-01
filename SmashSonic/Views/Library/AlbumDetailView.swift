@@ -88,7 +88,7 @@ struct AlbumDetailView: View {
                                     .resizable()
                                     .interpolation(.none)
                                     .scaledToFit()
-                                    .frame(height: 44)
+                                    .frame(height: 66)
                             }
                             .buttonStyle(.plain)
 
@@ -101,7 +101,7 @@ struct AlbumDetailView: View {
                                     .resizable()
                                     .interpolation(.none)
                                     .scaledToFit()
-                                    .frame(height: 44)
+                                    .frame(height: 66)
                             }
                             .buttonStyle(.plain)
 
@@ -117,7 +117,7 @@ struct AlbumDetailView: View {
                                     .resizable()
                                     .interpolation(.none)
                                     .scaledToFit()
-                                    .frame(height: 44)
+                                    .frame(height: 66)
                             }
                             .buttonStyle(.plain)
                         }
