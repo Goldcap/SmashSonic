@@ -2,133 +2,152 @@ import SwiftUI
 
 struct SearchView: View {
     @ObservedObject var viewModel: SearchViewModel
+    @ObservedObject private var settingsManager = SettingsManager.shared
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject private var downloadsViewModel = DownloadsViewModel()
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                // Search Bar
-                HStack {
+            ZStack {
+                backgroundView
+                    .ignoresSafeArea()
+
+                VStack(spacing: 0) {
+                    // Search Bar
                     HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundStyle(.secondary)
+                        HStack {
+                            Image(systemName: "magnifyingglass")
+                                .foregroundStyle(.secondary)
 
-                        TextField("Artists, albums, or songs", text: $viewModel.query)
-                            .textFieldStyle(.plain)
-                            .autocorrectionDisabled()
-                            .textInputAutocapitalization(.never)
-                            .focused($isSearchFocused)
+                            TextField("Artists, albums, or songs", text: $viewModel.query)
+                                .textFieldStyle(.plain)
+                                .autocorrectionDisabled()
+                                .textInputAutocapitalization(.never)
+                                .focused($isSearchFocused)
 
-                        if !viewModel.query.isEmpty {
-                            Button {
-                                viewModel.query = ""
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundStyle(.secondary)
-                            }
-                        }
-                    }
-                    .padding(12)
-                    .background(Color.secondary.opacity(0.1))
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-
-                    if isSearchFocused {
-                        Button("Cancel") {
-                            isSearchFocused = false
-                        }
-                        .transition(.move(edge: .trailing).combined(with: .opacity))
-                    }
-                }
-                .animation(.easeInOut(duration: 0.2), value: isSearchFocused)
-                .padding()
-
-                // Results
-                if viewModel.isSearching {
-                    Spacer()
-                    ProgressView("Searching...")
-                    Spacer()
-                } else if viewModel.isEmpty {
-                    Spacer()
-                    ContentUnavailableView.search(text: viewModel.query)
-                    Spacer()
-                } else if viewModel.hasResults {
-                    ScrollView {
-                        LazyVStack(alignment: .leading, spacing: 24) {
-                            // Artists
-                            if !viewModel.artists.isEmpty {
-                                Section {
-                                    ForEach(viewModel.artists) { artist in
-                                        NavigationLink(destination: ArtistDetailView(artist: artist, viewModel: LibraryViewModel())) {
-                                            SearchArtistRow(artist: artist)
-                                        }
-                                        .buttonStyle(.plain)
-                                    }
-                                } header: {
-                                    Text("Artists")
-                                        .font(.headline)
-                                        .padding(.horizontal)
+                            if !viewModel.query.isEmpty {
+                                Button {
+                                    viewModel.query = ""
+                                } label: {
+                                    Image(systemName: "xmark.circle.fill")
+                                        .foregroundStyle(.secondary)
                                 }
                             }
+                        }
+                        .padding(12)
+                        .background(Color.secondary.opacity(0.1))
+                        .clipShape(RoundedRectangle(cornerRadius: 10))
 
-                            // Albums
-                            if !viewModel.albums.isEmpty {
-                                Section {
-                                    ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack(spacing: 16) {
-                                            ForEach(viewModel.albums) { album in
-                                                NavigationLink(destination: AlbumDetailView(album: album)) {
-                                                    SearchAlbumCard(album: album)
-                                                }
-                                                .buttonStyle(.plain)
+                        if isSearchFocused {
+                            Button("Cancel") {
+                                isSearchFocused = false
+                            }
+                            .transition(.move(edge: .trailing).combined(with: .opacity))
+                        }
+                    }
+                    .animation(.easeInOut(duration: 0.2), value: isSearchFocused)
+                    .padding()
+
+                    // Results
+                    if viewModel.isSearching {
+                        Spacer()
+                        ProgressView("Searching...")
+                        Spacer()
+                    } else if viewModel.isEmpty {
+                        Spacer()
+                        ContentUnavailableView.search(text: viewModel.query)
+                        Spacer()
+                    } else if viewModel.hasResults {
+                        ScrollView {
+                            LazyVStack(alignment: .leading, spacing: 24) {
+                                // Artists
+                                if !viewModel.artists.isEmpty {
+                                    Section {
+                                        ForEach(viewModel.artists) { artist in
+                                            NavigationLink(destination: ArtistDetailView(artist: artist, viewModel: LibraryViewModel())) {
+                                                SearchArtistRow(artist: artist)
                                             }
+                                            .buttonStyle(.plain)
                                         }
-                                        .padding(.horizontal)
+                                    } header: {
+                                        Text("Artists")
+                                            .font(.headline)
+                                            .padding(.horizontal)
                                     }
-                                } header: {
-                                    Text("Albums")
-                                        .font(.headline)
-                                        .padding(.horizontal)
                                 }
-                            }
 
-                            // Songs
-                            if !viewModel.songs.isEmpty {
-                                Section {
-                                    ForEach(viewModel.songs) { song in
-                                        SongRow(song: song, songs: viewModel.songs, downloadsViewModel: downloadsViewModel)
+                                // Albums
+                                if !viewModel.albums.isEmpty {
+                                    Section {
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 16) {
+                                                ForEach(viewModel.albums) { album in
+                                                    NavigationLink(destination: AlbumDetailView(album: album)) {
+                                                        SearchAlbumCard(album: album)
+                                                    }
+                                                    .buttonStyle(.plain)
+                                                }
+                                            }
+                                            .padding(.horizontal)
+                                        }
+                                    } header: {
+                                        Text("Albums")
+                                            .font(.headline)
+                                            .padding(.horizontal)
                                     }
-                                } header: {
-                                    Text("Songs")
-                                        .font(.headline)
-                                        .padding(.horizontal)
+                                }
+
+                                // Songs
+                                if !viewModel.songs.isEmpty {
+                                    Section {
+                                        ForEach(viewModel.songs) { song in
+                                            SongRow(song: song, songs: viewModel.songs, downloadsViewModel: downloadsViewModel)
+                                        }
+                                    } header: {
+                                        Text("Songs")
+                                            .font(.headline)
+                                            .padding(.horizontal)
+                                    }
                                 }
                             }
+                            .padding(.vertical)
                         }
-                        .padding(.vertical)
+                        .scrollDismissesKeyboard(.interactively)
+                    } else if !viewModel.hasSearched {
+                        Spacer()
+                        VStack(spacing: 12) {
+                            Image(systemName: "magnifyingglass")
+                                .font(.system(size: 48))
+                                .foregroundStyle(.secondary)
+                            Text("Search your library")
+                                .font(.headline)
+                                .foregroundStyle(.secondary)
+                        }
+                        Spacer()
                     }
-                    .scrollDismissesKeyboard(.interactively)
-                } else if !viewModel.hasSearched {
-                    Spacer()
-                    VStack(spacing: 12) {
-                        Image(systemName: "magnifyingglass")
-                            .font(.system(size: 48))
-                            .foregroundStyle(.secondary)
-                        Text("Search your library")
-                            .font(.headline)
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
+                }
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    isSearchFocused = false
                 }
             }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                isSearchFocused = false
-            }
-            .background(Color.clear)
             .navigationTitle("Search")
             .toolbarBackground(.hidden, for: .navigationBar)
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if let color = settingsManager.backgroundType.solidColor {
+            color
+        } else if let imageName = settingsManager.backgroundType.imageName {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .opacity(0.3)
+        } else {
+            Color(.systemBackground)
         }
     }
 }

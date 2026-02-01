@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ServerSetupView: View {
     @ObservedObject private var client = SubsonicClient.shared
+    @ObservedObject private var settingsManager = SettingsManager.shared
     @Environment(\.dismiss) private var dismiss
 
     @State private var serverURL: String = ""
@@ -18,7 +19,11 @@ struct ServerSetupView: View {
     }
 
     var body: some View {
-        Form {
+        ZStack {
+            backgroundView
+                .ignoresSafeArea()
+
+            Form {
             if !isInitialSetup {
                 Section {
                     NavigationLink(destination: AppearanceSettingsView()) {
@@ -95,13 +100,27 @@ struct ServerSetupView: View {
                     .frame(maxWidth: .infinity)
                 }
             }
+            }
+            .scrollContentBackground(.hidden)
         }
-        .scrollContentBackground(.hidden)
-        .background(Color.clear)
         .navigationTitle(isInitialSetup ? "Connect to Server" : "Settings")
         .toolbarBackground(.hidden, for: .navigationBar)
         .onAppear {
             loadCurrentConfig()
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if let color = settingsManager.backgroundType.solidColor {
+            color
+        } else if let imageName = settingsManager.backgroundType.imageName {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .opacity(0.3)
+        } else {
+            Color(.systemBackground)
         }
     }
 

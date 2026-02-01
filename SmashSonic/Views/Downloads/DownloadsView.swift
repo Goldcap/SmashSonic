@@ -3,69 +3,74 @@ import SwiftData
 
 struct DownloadsView: View {
     @ObservedObject var viewModel: DownloadsViewModel
+    @ObservedObject private var settingsManager = SettingsManager.shared
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \DownloadedSong.downloadedAt, order: .reverse) private var downloadedSongs: [DownloadedSong]
 
     var body: some View {
         NavigationStack {
-            Group {
-                if downloadedSongs.isEmpty && viewModel.activeDownloads.isEmpty {
-                    ContentUnavailableView(
-                        "No Downloads",
-                        systemImage: "arrow.down.circle",
-                        description: Text("Downloaded songs will appear here for offline listening")
-                    )
-                } else {
-                    List {
-                        // Active Downloads
-                        if !viewModel.activeDownloads.isEmpty {
-                            Section("Downloading") {
-                                ForEach(Array(viewModel.activeDownloads.values), id: \.song.id) { download in
-                                    DownloadingRow(
-                                        song: download.song,
-                                        progress: viewModel.progress(for: download.song.id),
-                                        onCancel: { viewModel.cancelDownload(download.song.id) }
-                                    )
-                                }
-                            }
-                        }
+            ZStack {
+                backgroundView
+                    .ignoresSafeArea()
 
-                        // Downloaded Songs
-                        if !downloadedSongs.isEmpty {
-                            Section {
-                                ForEach(downloadedSongs) { downloaded in
-                                    DownloadedSongRow(
-                                        downloaded: downloaded,
-                                        isPlaying: playerViewModel.currentSong?.id == downloaded.id
-                                    )
-                                    .onTapGesture {
-                                        let songs = downloadedSongs.map { $0.toSong() }
-                                        playerViewModel.play(downloaded.toSong(), queue: songs)
+                Group {
+                    if downloadedSongs.isEmpty && viewModel.activeDownloads.isEmpty {
+                        ContentUnavailableView(
+                            "No Downloads",
+                            systemImage: "arrow.down.circle",
+                            description: Text("Downloaded songs will appear here for offline listening")
+                        )
+                    } else {
+                        List {
+                            // Active Downloads
+                            if !viewModel.activeDownloads.isEmpty {
+                                Section("Downloading") {
+                                    ForEach(Array(viewModel.activeDownloads.values), id: \.song.id) { download in
+                                        DownloadingRow(
+                                            song: download.song,
+                                            progress: viewModel.progress(for: download.song.id),
+                                            onCancel: { viewModel.cancelDownload(download.song.id) }
+                                        )
                                     }
                                 }
-                                .onDelete { indexSet in
-                                    for index in indexSet {
-                                        let song = downloadedSongs[index]
-                                        viewModel.deleteDownload(song.id, context: modelContext)
+                            }
+
+                            // Downloaded Songs
+                            if !downloadedSongs.isEmpty {
+                                Section {
+                                    ForEach(downloadedSongs) { downloaded in
+                                        DownloadedSongRow(
+                                            downloaded: downloaded,
+                                            isPlaying: playerViewModel.currentSong?.id == downloaded.id
+                                        )
+                                        .onTapGesture {
+                                            let songs = downloadedSongs.map { $0.toSong() }
+                                            playerViewModel.play(downloaded.toSong(), queue: songs)
+                                        }
                                     }
-                                }
-                            } header: {
-                                HStack {
-                                    Text("Downloaded")
-                                    Spacer()
-                                    Text(totalSizeFormatted)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
+                                    .onDelete { indexSet in
+                                        for index in indexSet {
+                                            let song = downloadedSongs[index]
+                                            viewModel.deleteDownload(song.id, context: modelContext)
+                                        }
+                                    }
+                                } header: {
+                                    HStack {
+                                        Text("Downloaded")
+                                        Spacer()
+                                        Text(totalSizeFormatted)
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
                                 }
                             }
                         }
+                        .listStyle(.insetGrouped)
+                        .scrollContentBackground(.hidden)
                     }
-                    .listStyle(.insetGrouped)
-                    .scrollContentBackground(.hidden)
                 }
             }
-            .background(Color.clear)
             .navigationTitle("Downloads")
             .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
@@ -104,6 +109,20 @@ struct DownloadsView: View {
     var totalSizeFormatted: String {
         let total = downloadedSongs.compactMap { $0.fileSize }.reduce(0, +)
         return total.formattedFileSize
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if let color = settingsManager.backgroundType.solidColor {
+            color
+        } else if let imageName = settingsManager.backgroundType.imageName {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .opacity(0.3)
+        } else {
+            Color(.systemBackground)
+        }
     }
 }
 

@@ -4,40 +4,58 @@ struct AppearanceSettingsView: View {
     @ObservedObject private var settingsManager = SettingsManager.shared
 
     var body: some View {
-        Form {
-            // None option
-            Section {
-                backgroundOptionButton(for: .none)
-            } header: {
-                Text("Default")
-            }
+        ZStack {
+            backgroundView
+                .ignoresSafeArea()
 
-            // Solid colors section
-            Section {
-                ForEach(BackgroundType.solidColors, id: \.self) { backgroundType in
-                    solidColorButton(for: backgroundType)
+            Form {
+                // None option
+                Section {
+                    backgroundOptionButton(for: .none)
+                } header: {
+                    Text("Default")
                 }
-            } header: {
-                Text("Solid Colors")
-            } footer: {
-                Text("Simple solid color backgrounds.")
-            }
 
-            // Pixel art section
-            Section {
-                ForEach(BackgroundType.pixelArtBackgrounds, id: \.self) { backgroundType in
-                    pixelArtButton(for: backgroundType)
+                // Solid colors section
+                Section {
+                    ForEach(BackgroundType.solidColors, id: \.self) { backgroundType in
+                        solidColorButton(for: backgroundType)
+                    }
+                } header: {
+                    Text("Solid Colors")
+                } footer: {
+                    Text("Simple solid color backgrounds.")
                 }
-            } header: {
-                Text("Pixel Art")
-            } footer: {
-                Text("8-bit themed background images.")
+
+                // Pixel art section
+                Section {
+                    ForEach(BackgroundType.pixelArtBackgrounds, id: \.self) { backgroundType in
+                        pixelArtButton(for: backgroundType)
+                    }
+                } header: {
+                    Text("Pixel Art")
+                } footer: {
+                    Text("8-bit themed background images.")
+                }
             }
+            .scrollContentBackground(.hidden)
         }
-        .scrollContentBackground(.hidden)
-        .background(Color.clear)
         .navigationTitle("Appearance")
         .toolbarBackground(.hidden, for: .navigationBar)
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if let color = settingsManager.backgroundType.solidColor {
+            color
+        } else if let imageName = settingsManager.backgroundType.imageName {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .opacity(0.3)
+        } else {
+            Color(.systemBackground)
+        }
     }
 
     @ViewBuilder

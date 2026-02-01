@@ -169,30 +169,49 @@ struct HomeView: View {
 
 struct BrowseView: View {
     @ObservedObject var viewModel: LibraryViewModel
+    @ObservedObject private var settingsManager = SettingsManager.shared
     @State private var selectedSection = 0
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                Picker("Section", selection: $selectedSection) {
-                    Text("Artists").tag(0)
-                    Text("Albums").tag(1)
-                }
-                .pickerStyle(.segmented)
-                .padding()
+            ZStack {
+                backgroundView
+                    .ignoresSafeArea()
 
-                Group {
-                    if selectedSection == 0 {
-                        ArtistsView(viewModel: viewModel)
-                    } else {
-                        AlbumsView(viewModel: viewModel)
+                VStack(spacing: 0) {
+                    Picker("Section", selection: $selectedSection) {
+                        Text("Artists").tag(0)
+                        Text("Albums").tag(1)
                     }
+                    .pickerStyle(.segmented)
+                    .padding()
+
+                    Group {
+                        if selectedSection == 0 {
+                            ArtistsView(viewModel: viewModel)
+                        } else {
+                            AlbumsView(viewModel: viewModel)
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
-            .background(Color.clear)
             .navigationTitle("Browse")
             .toolbarBackground(.hidden, for: .navigationBar)
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if let color = settingsManager.backgroundType.solidColor {
+            color
+        } else if let imageName = settingsManager.backgroundType.imageName {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .opacity(0.3)
+        } else {
+            Color(.systemBackground)
         }
     }
 }
