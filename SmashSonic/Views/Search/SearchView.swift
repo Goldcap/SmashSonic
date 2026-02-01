@@ -191,7 +191,10 @@ struct SearchArtistRow: View {
                 .foregroundStyle(.tertiary)
         }
         .padding(.horizontal)
-        .padding(.vertical, 4)
+        .padding(.vertical, 8)
+        .background(Color.black.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal)
     }
 }
 
@@ -223,6 +226,11 @@ struct SearchAlbumCard: View {
                         .lineLimit(1)
                 }
             }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .frame(width: 140, alignment: .leading)
+            .background(Color.black.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .frame(width: 140)
     }

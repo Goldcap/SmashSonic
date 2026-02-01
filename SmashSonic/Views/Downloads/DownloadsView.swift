@@ -32,6 +32,7 @@ struct DownloadsView: View {
                                             progress: viewModel.progress(for: download.song.id),
                                             onCancel: { viewModel.cancelDownload(download.song.id) }
                                         )
+                                        .listRowBackground(Color.black.opacity(0.5))
                                     }
                                 }
                             }
@@ -44,6 +45,7 @@ struct DownloadsView: View {
                                             downloaded: downloaded,
                                             isPlaying: playerViewModel.currentSong?.id == downloaded.id
                                         )
+                                        .listRowBackground(Color.black.opacity(0.5))
                                         .onTapGesture {
                                             let songs = downloadedSongs.map { $0.toSong() }
                                             playerViewModel.play(downloaded.toSong(), queue: songs)

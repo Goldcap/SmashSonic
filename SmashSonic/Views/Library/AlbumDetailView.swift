@@ -214,6 +214,9 @@ struct SongRow: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 10)
+        .background(Color.black.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal)
         .contentShape(Rectangle())
         .onTapGesture {
             playerViewModel.play(song, queue: songs)

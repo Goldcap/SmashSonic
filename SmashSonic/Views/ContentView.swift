@@ -286,6 +286,11 @@ struct HomeAlbumCard: View {
                         .lineLimit(1)
                 }
             }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .frame(width: 150, alignment: .leading)
+            .background(Color.black.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
         .frame(width: 150)
     }
@@ -305,14 +310,12 @@ struct PlaylistSection: View {
                 .fontWeight(.bold)
                 .padding(.horizontal)
 
-            LazyVStack(spacing: 0) {
+            LazyVStack(spacing: 8) {
                 ForEach(playlists) { playlist in
                     NavigationLink(destination: PlaylistDetailView(playlist: playlist, viewModel: viewModel)) {
                         PlaylistRow(playlist: playlist)
                     }
                     .buttonStyle(.plain)
-                    Divider()
-                        .padding(.leading, 76)
                 }
             }
         }
@@ -354,6 +357,9 @@ struct PlaylistRow: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+        .background(Color.black.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal)
     }
 }
 
@@ -503,6 +509,9 @@ struct PlaylistSongRow: View {
         }
         .padding(.horizontal)
         .padding(.vertical, 8)
+        .background(Color.black.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal)
         .contentShape(Rectangle())
         .onTapGesture {
             playerViewModel.play(song, queue: songs)

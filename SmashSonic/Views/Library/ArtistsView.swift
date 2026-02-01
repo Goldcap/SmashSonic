@@ -45,6 +45,7 @@ struct ArtistsView: View {
                     NavigationLink(destination: ArtistDetailView(artist: artist, viewModel: viewModel)) {
                         ArtistRow(artist: artist)
                     }
+                    .listRowBackground(Color.black.opacity(0.5))
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)

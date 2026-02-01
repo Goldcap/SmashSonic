@@ -99,6 +99,11 @@ struct AlbumCard: View {
                         .lineLimit(1)
                 }
             }
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.black.opacity(0.5))
+            .clipShape(RoundedRectangle(cornerRadius: 6))
         }
     }
 }
@@ -145,5 +150,8 @@ struct AlbumRow: View {
                 .foregroundStyle(.tertiary)
         }
         .padding()
+        .background(Color.black.opacity(0.5))
+        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .padding(.horizontal)
     }
 }
