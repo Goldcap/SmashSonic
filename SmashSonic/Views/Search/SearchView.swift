@@ -115,7 +115,6 @@ struct SearchView: View {
                         }
                         .scrollDismissesKeyboard(.interactively)
                     } else if !viewModel.hasSearched {
-                        Spacer()
                         VStack(spacing: 12) {
                             Image(systemName: "magnifyingglass")
                                 .font(.system(size: 48))
@@ -124,12 +123,9 @@ struct SearchView: View {
                                 .font(.headline)
                                 .foregroundStyle(.secondary)
                         }
+                        .padding(.top, 40)
                         Spacer()
                     }
-                }
-                .contentShape(Rectangle())
-                .onTapGesture {
-                    isSearchFocused = false
                 }
             }
             .navigationTitle("Search")
