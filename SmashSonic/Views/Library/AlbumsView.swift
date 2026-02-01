@@ -61,6 +61,7 @@ struct AlbumsView: View {
                 }
             }
         }
+        .background(Color.clear)
         .task {
             if viewModel.albums.isEmpty {
                 await viewModel.loadAlbums()

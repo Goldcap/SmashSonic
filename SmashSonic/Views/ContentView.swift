@@ -12,6 +12,9 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
+            // App background
+            BackgroundView()
+
             TabView(selection: $selectedTab) {
                 HomeView(viewModel: libraryViewModel)
                     .tabItem {
@@ -45,6 +48,7 @@ struct ContentView: View {
                     }
                     .tag(4)
             }
+            .scrollContentBackground(.hidden)
 
             if playerViewModel.currentSong != nil {
                 VStack(spacing: 0) {
@@ -128,7 +132,10 @@ struct HomeView: View {
                 }
                 .padding(.vertical)
             }
+            .scrollContentBackground(.hidden)
+            .background(Color.clear)
             .navigationTitle("Home")
+            .toolbarBackground(.hidden, for: .navigationBar)
             .refreshable {
                 await viewModel.loadHomeData()
             }
@@ -166,7 +173,9 @@ struct BrowseView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             }
+            .background(Color.clear)
             .navigationTitle("Browse")
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
     }
 }
@@ -396,8 +405,11 @@ struct PlaylistDetailView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.clear)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .task {
             loadedPlaylist = await viewModel.loadPlaylist(id: playlist.id)
         }

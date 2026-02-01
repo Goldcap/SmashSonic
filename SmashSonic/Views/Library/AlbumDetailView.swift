@@ -132,8 +132,11 @@ struct AlbumDetailView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.clear)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .task {
             loadedAlbum = await viewModel.loadAlbum(id: album.id)
         }

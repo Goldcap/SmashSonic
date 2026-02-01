@@ -10,6 +10,9 @@ struct BackgroundView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fill)
                     .ignoresSafeArea()
+            } else if let color = settingsManager.backgroundType.solidColor {
+                color
+                    .ignoresSafeArea()
             } else {
                 Color.clear
             }
@@ -22,7 +25,13 @@ struct AppBackgroundModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         ZStack {
-            if let imageName = settingsManager.backgroundType.imageName {
+            // Solid color backgrounds (full opacity)
+            if let color = settingsManager.backgroundType.solidColor {
+                color
+                    .ignoresSafeArea()
+            }
+            // Pixel art backgrounds (with opacity)
+            else if let imageName = settingsManager.backgroundType.imageName {
                 Image(imageName)
                     .resizable()
                     .aspectRatio(contentMode: .fill)

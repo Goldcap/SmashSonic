@@ -62,9 +62,12 @@ struct DownloadsView: View {
                         }
                     }
                     .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
                 }
             }
+            .background(Color.clear)
             .navigationTitle("Downloads")
+            .toolbarBackground(.hidden, for: .navigationBar)
             .toolbar {
                 if !downloadedSongs.isEmpty {
                     ToolbarItem(placement: .topBarTrailing) {

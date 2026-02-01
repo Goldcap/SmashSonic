@@ -126,7 +126,9 @@ struct SearchView: View {
             .onTapGesture {
                 isSearchFocused = false
             }
+            .background(Color.clear)
             .navigationTitle("Search")
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
     }
 }

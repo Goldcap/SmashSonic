@@ -96,7 +96,10 @@ struct ServerSetupView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.clear)
         .navigationTitle(isInitialSetup ? "Connect to Server" : "Settings")
+        .toolbarBackground(.hidden, for: .navigationBar)
         .onAppear {
             loadCurrentConfig()
         }

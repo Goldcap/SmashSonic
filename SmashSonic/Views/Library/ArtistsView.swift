@@ -47,11 +47,13 @@ struct ArtistsView: View {
                     }
                 }
                 .listStyle(.plain)
+                .scrollContentBackground(.hidden)
                 .refreshable {
                     await viewModel.loadArtists()
                 }
             }
         }
+        .background(Color.clear)
         .task {
             if viewModel.artists.isEmpty {
                 await viewModel.loadArtists()
@@ -111,7 +113,10 @@ struct ArtistDetailView: View {
                 }
             }
         }
+        .scrollContentBackground(.hidden)
+        .background(Color.clear)
         .navigationTitle(artist.name)
+        .toolbarBackground(.hidden, for: .navigationBar)
         .task {
             artistDetail = await viewModel.loadArtist(id: artist.id)
         }
