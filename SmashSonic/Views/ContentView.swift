@@ -86,7 +86,7 @@ struct CustomTabBar: View {
                             .resizable()
                             .interpolation(.none)
                             .scaledToFit()
-                            .frame(width: 28, height: 28)
+                            .frame(width: 36, height: 36)
                             .opacity(selectedTab == index ? 1.0 : 0.5)
 
                         Text(tabs[index].label)
