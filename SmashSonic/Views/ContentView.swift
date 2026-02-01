@@ -14,28 +14,24 @@ struct ContentView: View {
         ZStack(alignment: .bottom) {
             TabView(selection: $selectedTab) {
                 HomeView(viewModel: libraryViewModel)
-                    .appBackground()
                     .tabItem {
                         Label("Home", systemImage: "house")
                     }
                     .tag(0)
 
                 BrowseView(viewModel: libraryViewModel)
-                    .appBackground()
                     .tabItem {
                         Label("Browse", systemImage: "square.grid.2x2")
                     }
                     .tag(1)
 
                 SearchView(viewModel: searchViewModel)
-                    .appBackground()
                     .tabItem {
                         Label("Search", systemImage: "magnifyingglass")
                     }
                     .tag(2)
 
                 DownloadsView(viewModel: downloadsViewModel)
-                    .appBackground()
                     .tabItem {
                         Label("Downloads", systemImage: "arrow.down.circle")
                     }
@@ -44,7 +40,6 @@ struct ContentView: View {
                 NavigationStack {
                     ServerSetupView()
                 }
-                .appBackground()
                     .tabItem {
                         Label("Settings", systemImage: "gear")
                     }
@@ -79,63 +74,69 @@ struct ContentView: View {
 
 struct HomeView: View {
     @ObservedObject var viewModel: LibraryViewModel
+    @ObservedObject private var settingsManager = SettingsManager.shared
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 24) {
-                    if viewModel.isLoading && viewModel.randomAlbums.isEmpty {
-                        HStack {
-                            Spacer()
-                            ProgressView()
-                            Spacer()
-                        }
-                        .padding(.top, 50)
-                    } else if let error = viewModel.error, viewModel.randomAlbums.isEmpty {
-                        VStack(spacing: 12) {
-                            Image(systemName: "exclamationmark.triangle")
-                                .font(.largeTitle)
-                                .foregroundStyle(.secondary)
-                            Text(error)
-                                .foregroundStyle(.secondary)
-                            Button("Retry") {
-                                Task { await viewModel.loadHomeData() }
+            ZStack {
+                // Background
+                backgroundView
+                    .ignoresSafeArea()
+
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        if viewModel.isLoading && viewModel.randomAlbums.isEmpty {
+                            HStack {
+                                Spacer()
+                                ProgressView()
+                                Spacer()
                             }
-                            .buttonStyle(.bordered)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 50)
-                    } else {
-                        // Random Albums
-                        if !viewModel.randomAlbums.isEmpty {
-                            AlbumSection(
-                                title: "Random",
-                                albums: viewModel.randomAlbums,
-                                showRefresh: true,
-                                onRefresh: { Task { await viewModel.refreshRandom() } }
-                            )
-                        }
+                            .padding(.top, 50)
+                        } else if let error = viewModel.error, viewModel.randomAlbums.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "exclamationmark.triangle")
+                                    .font(.largeTitle)
+                                    .foregroundStyle(.secondary)
+                                Text(error)
+                                    .foregroundStyle(.secondary)
+                                Button("Retry") {
+                                    Task { await viewModel.loadHomeData() }
+                                }
+                                .buttonStyle(.bordered)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .padding(.top, 50)
+                        } else {
+                            // Random Albums
+                            if !viewModel.randomAlbums.isEmpty {
+                                AlbumSection(
+                                    title: "Random",
+                                    albums: viewModel.randomAlbums,
+                                    showRefresh: true,
+                                    onRefresh: { Task { await viewModel.refreshRandom() } }
+                                )
+                            }
 
-                        // Recently Added
-                        if !viewModel.recentAlbums.isEmpty {
-                            AlbumSection(title: "Recently Added", albums: viewModel.recentAlbums)
-                        }
+                            // Recently Added
+                            if !viewModel.recentAlbums.isEmpty {
+                                AlbumSection(title: "Recently Added", albums: viewModel.recentAlbums)
+                            }
 
-                        // Starred
-                        if !viewModel.starredAlbums.isEmpty {
-                            AlbumSection(title: "Starred", albums: viewModel.starredAlbums)
-                        }
+                            // Starred
+                            if !viewModel.starredAlbums.isEmpty {
+                                AlbumSection(title: "Starred", albums: viewModel.starredAlbums)
+                            }
 
-                        // Playlists
-                        if !viewModel.playlists.isEmpty {
-                            PlaylistSection(title: "Playlists", playlists: viewModel.playlists, viewModel: viewModel)
+                            // Playlists
+                            if !viewModel.playlists.isEmpty {
+                                PlaylistSection(title: "Playlists", playlists: viewModel.playlists, viewModel: viewModel)
+                            }
                         }
                     }
+                    .padding(.vertical)
                 }
-                .padding(.vertical)
+                .scrollContentBackground(.hidden)
             }
-            .scrollContentBackground(.hidden)
-            .background(Color.clear)
             .navigationTitle("Home")
             .toolbarBackground(.hidden, for: .navigationBar)
             .refreshable {
@@ -146,6 +147,20 @@ struct HomeView: View {
                     await viewModel.loadHomeData()
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        if let color = settingsManager.backgroundType.solidColor {
+            color
+        } else if let imageName = settingsManager.backgroundType.imageName {
+            Image(imageName)
+                .resizable()
+                .scaledToFill()
+                .opacity(0.3)
+        } else {
+            Color(.systemBackground)
         }
     }
 }

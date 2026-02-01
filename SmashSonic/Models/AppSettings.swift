@@ -48,12 +48,12 @@ enum BackgroundType: String, CaseIterable, Codable {
 
     var solidColor: Color? {
         switch self {
-        case .solidBlack: return Color.black
+        case .solidBlack: return Color.cyan
         case .solidDarkGray: return Color(white: 0.15)
         case .solidNavy: return Color(red: 0.1, green: 0.1, blue: 0.3)
         case .solidPurple: return Color(red: 0.2, green: 0.1, blue: 0.3)
         case .solidForest: return Color(red: 0.05, green: 0.2, blue: 0.1)
-        case .solidBurgundy: return Color(red: 0.3, green: 0.1, blue: 0.1)
+        case .solidBurgundy: return Color.magenta
         default: return nil
         }
     }
