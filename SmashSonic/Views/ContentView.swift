@@ -463,10 +463,18 @@ struct PlaylistDetailView: View {
                             Button {
                                 playerViewModel.play(songs[0], queue: songs)
                             } label: {
-                                Label("Play", systemImage: "play.fill")
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
+                                HStack(spacing: 8) {
+                                    Image("PixelPlay")
+                                        .renderingMode(.original)
+                                        .resizable()
+                                        .interpolation(.none)
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                    Text("Play")
+                                        .font(.headline)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
                             }
                             .buttonStyle(.borderedProminent)
 
@@ -474,10 +482,18 @@ struct PlaylistDetailView: View {
                                 let shuffled = songs.shuffled()
                                 playerViewModel.play(shuffled[0], queue: shuffled)
                             } label: {
-                                Label("Shuffle", systemImage: "shuffle")
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
+                                HStack(spacing: 8) {
+                                    Image("PixelShuffle")
+                                        .renderingMode(.original)
+                                        .resizable()
+                                        .interpolation(.none)
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                    Text("Shuffle")
+                                        .font(.headline)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
                             }
                             .buttonStyle(.bordered)
                         }

@@ -83,10 +83,18 @@ struct AlbumDetailView: View {
                             Button {
                                 playerViewModel.play(sortedSongs[0], queue: sortedSongs)
                             } label: {
-                                Label("Play", systemImage: "play.fill")
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
+                                HStack(spacing: 8) {
+                                    Image("PixelPlay")
+                                        .renderingMode(.original)
+                                        .resizable()
+                                        .interpolation(.none)
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                    Text("Play")
+                                        .font(.headline)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
                             }
                             .buttonStyle(.borderedProminent)
 
@@ -94,10 +102,18 @@ struct AlbumDetailView: View {
                                 let shuffled = sortedSongs.shuffled()
                                 playerViewModel.play(shuffled[0], queue: shuffled)
                             } label: {
-                                Label("Shuffle", systemImage: "shuffle")
-                                    .font(.headline)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
+                                HStack(spacing: 8) {
+                                    Image("PixelShuffle")
+                                        .renderingMode(.original)
+                                        .resizable()
+                                        .interpolation(.none)
+                                        .scaledToFit()
+                                        .frame(width: 24, height: 24)
+                                    Text("Shuffle")
+                                        .font(.headline)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
                             }
                             .buttonStyle(.bordered)
 
@@ -108,9 +124,13 @@ struct AlbumDetailView: View {
                                     }
                                 }
                             } label: {
-                                Image(systemName: "arrow.down.circle")
-                                    .font(.title2)
-                                    .padding(.vertical, 10)
+                                Image("PixelDownload")
+                                    .renderingMode(.original)
+                                    .resizable()
+                                    .interpolation(.none)
+                                    .scaledToFit()
+                                    .frame(width: 28, height: 28)
+                                    .padding(.vertical, 8)
                                     .padding(.horizontal, 12)
                             }
                             .buttonStyle(.bordered)
