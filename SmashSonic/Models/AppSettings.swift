@@ -22,8 +22,8 @@ enum BackgroundType: String, CaseIterable, Codable {
     var displayName: String {
         switch self {
         case .none: return "None"
-        case .solidBlack: return "Black"
-        case .solidDarkGray: return "Dark Gray"
+        case .solidBlack: return "Cyan"
+        case .solidDarkGray: return "Light Gray"
         case .solidNavy: return "Navy"
         case .solidPurple: return "Purple"
         case .solidForest: return "Forest"
@@ -49,7 +49,7 @@ enum BackgroundType: String, CaseIterable, Codable {
     var solidColor: Color? {
         switch self {
         case .solidBlack: return Color.cyan
-        case .solidDarkGray: return Color(white: 0.15)
+        case .solidDarkGray: return Color(white: 0.7)
         case .solidNavy: return Color(red: 0.1, green: 0.1, blue: 0.3)
         case .solidPurple: return Color(red: 0.2, green: 0.1, blue: 0.3)
         case .solidForest: return Color(red: 0.05, green: 0.2, blue: 0.1)
