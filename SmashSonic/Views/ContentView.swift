@@ -12,47 +12,37 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            TabView(selection: $selectedTab) {
-                HomeView(viewModel: libraryViewModel)
-                    .tabItem {
-                        Label("Home", systemImage: "house")
+            // Content area
+            Group {
+                switch selectedTab {
+                case 0:
+                    HomeView(viewModel: libraryViewModel)
+                case 1:
+                    BrowseView(viewModel: libraryViewModel)
+                case 2:
+                    SearchView(viewModel: searchViewModel)
+                case 3:
+                    DownloadsView(viewModel: downloadsViewModel)
+                case 4:
+                    NavigationStack {
+                        ServerSetupView()
                     }
-                    .tag(0)
-
-                BrowseView(viewModel: libraryViewModel)
-                    .tabItem {
-                        Label("Browse", systemImage: "square.grid.2x2")
-                    }
-                    .tag(1)
-
-                SearchView(viewModel: searchViewModel)
-                    .tabItem {
-                        Label("Search", systemImage: "magnifyingglass")
-                    }
-                    .tag(2)
-
-                DownloadsView(viewModel: downloadsViewModel)
-                    .tabItem {
-                        Label("Downloads", systemImage: "arrow.down.circle")
-                    }
-                    .tag(3)
-
-                NavigationStack {
-                    ServerSetupView()
+                default:
+                    HomeView(viewModel: libraryViewModel)
                 }
-                    .tabItem {
-                        Label("Settings", systemImage: "gear")
-                    }
-                    .tag(4)
             }
-            .scrollContentBackground(.hidden)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
+            // Mini player (if playing)
             if playerViewModel.currentSong != nil {
                 VStack(spacing: 0) {
                     MiniPlayerView()
-                        .padding(.bottom, 49)
+                        .padding(.bottom, 70)
                 }
             }
+
+            // Custom tab bar
+            CustomTabBar(selectedTab: $selectedTab, showMiniPlayer: playerViewModel.currentSong != nil)
         }
         .sheet(isPresented: $playerViewModel.showFullPlayer) {
             NowPlayingView()
@@ -68,6 +58,55 @@ struct ContentView: View {
     }
 
     @Environment(\.modelContext) private var modelContext
+}
+
+// MARK: - Custom Tab Bar
+
+struct CustomTabBar: View {
+    @Binding var selectedTab: Int
+    var showMiniPlayer: Bool
+
+    private let tabs: [(icon: String, label: String)] = [
+        ("PixelHome", "Home"),
+        ("PixelBrowse", "Browse"),
+        ("PixelSearch", "Search"),
+        ("PixelDownloads", "Downloads"),
+        ("PixelSettings", "Settings")
+    ]
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(0..<tabs.count, id: \.self) { index in
+                Button {
+                    selectedTab = index
+                } label: {
+                    VStack(spacing: 4) {
+                        Image(tabs[index].icon)
+                            .renderingMode(.original)
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFit()
+                            .frame(width: 28, height: 28)
+                            .opacity(selectedTab == index ? 1.0 : 0.5)
+
+                        Text(tabs[index].label)
+                            .font(.system(size: 10))
+                            .foregroundColor(selectedTab == index ? .primary : .secondary)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 8)
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.bottom, 20)
+        .background(
+            Rectangle()
+                .fill(.ultraThinMaterial)
+                .ignoresSafeArea()
+        )
+    }
 }
 
 // MARK: - Home View
