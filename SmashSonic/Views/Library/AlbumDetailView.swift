@@ -80,60 +80,34 @@ struct AlbumDetailView: View {
                     // Play Button
                     if !sortedSongs.isEmpty {
                         HStack(spacing: 12) {
-                            Button {
+                            PixelActionButton(
+                                title: "Play",
+                                icon: "PixelPlay",
+                                style: .primary
+                            ) {
                                 playerViewModel.play(sortedSongs[0], queue: sortedSongs)
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image("PixelPlay")
-                                        .renderingMode(.original)
-                                        .resizable()
-                                        .interpolation(.none)
-                                        .scaledToFit()
-                                        .frame(width: 24, height: 24)
-                                    Text("Play")
-                                        .font(.headline)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
                             }
-                            .buttonStyle(.borderedProminent)
 
-                            Button {
+                            PixelActionButton(
+                                title: "Shuffle",
+                                icon: "PixelShuffle",
+                                style: .secondary
+                            ) {
                                 let shuffled = sortedSongs.shuffled()
                                 playerViewModel.play(shuffled[0], queue: shuffled)
-                            } label: {
-                                HStack(spacing: 8) {
-                                    Image("PixelShuffle")
-                                        .renderingMode(.original)
-                                        .resizable()
-                                        .interpolation(.none)
-                                        .scaledToFit()
-                                        .frame(width: 24, height: 24)
-                                    Text("Shuffle")
-                                        .font(.headline)
-                                }
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
                             }
-                            .buttonStyle(.bordered)
 
-                            Button {
+                            PixelActionButton(
+                                title: nil,
+                                icon: "PixelDownload",
+                                style: .secondary
+                            ) {
                                 for song in sortedSongs {
                                     if !downloadsViewModel.isDownloaded(song.id) && !downloadsViewModel.isDownloading(song.id) {
                                         downloadsViewModel.download(song)
                                     }
                                 }
-                            } label: {
-                                Image("PixelDownload")
-                                    .renderingMode(.original)
-                                    .resizable()
-                                    .interpolation(.none)
-                                    .scaledToFit()
-                                    .frame(width: 28, height: 28)
-                                    .padding(.vertical, 8)
-                                    .padding(.horizontal, 12)
                             }
-                            .buttonStyle(.bordered)
                         }
                         .padding(.horizontal)
                     }

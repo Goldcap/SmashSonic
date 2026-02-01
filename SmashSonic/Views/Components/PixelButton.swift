@@ -102,8 +102,75 @@ struct PixelPlayPauseButton: View {
     }
 }
 
+enum PixelActionButtonStyle {
+    case primary
+    case secondary
+
+    var backgroundImage: String {
+        switch self {
+        case .primary: return "PixelButtonPrimary"
+        case .secondary: return "PixelButtonSecondary"
+        }
+    }
+}
+
+struct PixelActionButton: View {
+    let title: String?
+    let icon: String?
+    let style: PixelActionButtonStyle
+    let action: () -> Void
+
+    init(title: String? = nil, icon: String? = nil, style: PixelActionButtonStyle = .primary, action: @escaping () -> Void) {
+        self.title = title
+        self.icon = icon
+        self.style = style
+        self.action = action
+    }
+
+    var body: some View {
+        Button(action: action) {
+            ZStack {
+                Image(style.backgroundImage)
+                    .renderingMode(.original)
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFill()
+
+                HStack(spacing: 6) {
+                    if let icon = icon {
+                        Image(icon)
+                            .renderingMode(.original)
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                    }
+
+                    if let title = title {
+                        Text(title)
+                            .font(.system(size: 14, weight: .bold))
+                            .foregroundColor(.white)
+                            .shadow(color: .black, radius: 1, x: 1, y: 1)
+                    }
+                }
+            }
+            .frame(height: 44)
+            .frame(maxWidth: title != nil ? .infinity : 60)
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 #Preview {
     VStack(spacing: 20) {
+        HStack(spacing: 12) {
+            PixelActionButton(title: "Play", icon: "PixelPlay", style: .primary) {}
+            PixelActionButton(title: "Shuffle", icon: "PixelShuffle", style: .secondary) {}
+            PixelActionButton(icon: "PixelDownload", style: .secondary) {}
+        }
+        .padding(.horizontal)
+
         HStack(spacing: 20) {
             PixelButton(type: .previous) {}
             PixelButton(type: .play, size: 48) {}
