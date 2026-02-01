@@ -152,15 +152,19 @@ struct HomeView: View {
 
     @ViewBuilder
     private var backgroundView: some View {
-        if let color = settingsManager.backgroundType.solidColor {
-            color
-        } else if let imageName = settingsManager.backgroundType.imageName {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .opacity(0.3)
-        } else {
-            Color(.systemBackground)
+        GeometryReader { geo in
+            if let color = settingsManager.backgroundType.solidColor {
+                color
+            } else if let imageName = settingsManager.backgroundType.imageName {
+                Image(imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .opacity(0.3)
+            } else {
+                Color(.systemBackground)
+            }
         }
     }
 }
@@ -203,15 +207,19 @@ struct BrowseView: View {
 
     @ViewBuilder
     private var backgroundView: some View {
-        if let color = settingsManager.backgroundType.solidColor {
-            color
-        } else if let imageName = settingsManager.backgroundType.imageName {
-            Image(imageName)
-                .resizable()
-                .scaledToFill()
-                .opacity(0.3)
-        } else {
-            Color(.systemBackground)
+        GeometryReader { geo in
+            if let color = settingsManager.backgroundType.solidColor {
+                color
+            } else if let imageName = settingsManager.backgroundType.imageName {
+                Image(imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .opacity(0.3)
+            } else {
+                Color(.systemBackground)
+            }
         }
     }
 }
