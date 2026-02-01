@@ -99,6 +99,20 @@ struct AlbumDetailView: View {
                                     .padding(.vertical, 12)
                             }
                             .buttonStyle(.bordered)
+
+                            Button {
+                                for song in sortedSongs {
+                                    if !downloadsViewModel.isDownloaded(song.id) && !downloadsViewModel.isDownloading(song.id) {
+                                        downloadsViewModel.download(song)
+                                    }
+                                }
+                            } label: {
+                                Image(systemName: "arrow.down.circle")
+                                    .font(.title2)
+                                    .padding(.vertical, 10)
+                                    .padding(.horizontal, 12)
+                            }
+                            .buttonStyle(.bordered)
                         }
                         .padding(.horizontal)
                     }
@@ -114,6 +128,7 @@ struct AlbumDetailView: View {
                             Divider()
                         }
                     }
+                    .padding(.bottom, 80)
                 }
             }
         }

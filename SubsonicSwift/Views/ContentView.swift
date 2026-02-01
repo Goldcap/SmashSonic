@@ -37,7 +37,9 @@ struct ContentView: View {
                     }
                     .tag(3)
 
-                ServerSetupView()
+                NavigationStack {
+                    ServerSetupView()
+                }
                     .tabItem {
                         Label("Settings", systemImage: "gear")
                     }
@@ -390,6 +392,7 @@ struct PlaylistDetailView: View {
                             Divider()
                         }
                     }
+                    .padding(.bottom, 80)
                 }
             }
         }

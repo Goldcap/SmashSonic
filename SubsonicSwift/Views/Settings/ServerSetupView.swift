@@ -19,6 +19,16 @@ struct ServerSetupView: View {
 
     var body: some View {
         Form {
+            if !isInitialSetup {
+                Section {
+                    NavigationLink(destination: AppearanceSettingsView()) {
+                        Label("Appearance", systemImage: "paintbrush")
+                    }
+                } header: {
+                    Text("Customization")
+                }
+            }
+
             Section {
                 TextField("Server URL", text: $serverURL)
                     .textContentType(.URL)

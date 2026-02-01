@@ -4,6 +4,7 @@ import SwiftData
 @main
 struct SubsonicSwiftApp: App {
     @StateObject private var playerViewModel = PlayerViewModel()
+    @State private var launchScreenFinished = false
 
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
@@ -20,9 +21,15 @@ struct SubsonicSwiftApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(playerViewModel)
-                .modelContainer(sharedModelContainer)
+            ZStack {
+                ContentView()
+                    .environmentObject(playerViewModel)
+                    .modelContainer(sharedModelContainer)
+
+                if !launchScreenFinished {
+                    LaunchScreenView(isFinished: $launchScreenFinished)
+                }
+            }
         }
     }
 }

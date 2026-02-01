@@ -7,6 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		6A680CC62F2FA0D500220D05 /* BackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A680CC52F2FA0D500220D05 /* BackgroundView.swift */; };
+		6A680CC92F2FA0E500220D05 /* PixelButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A680CC82F2FA0E500220D05 /* PixelButton.swift */; };
+		6A680CCA2F2FA0E500220D05 /* LaunchScreenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A680CC72F2FA0E500220D05 /* LaunchScreenView.swift */; };
+		6A680CCC2F2FA0F800220D05 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A680CCB2F2FA0F800220D05 /* AppSettings.swift */; };
+		6A680CCE2F2FA10200220D05 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A680CCD2F2FA10200220D05 /* SettingsManager.swift */; };
+		6A680CD02F2FA11000220D05 /* AppearanceSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A680CCF2F2FA11000220D05 /* AppearanceSettingsView.swift */; };
 		A1000001299C8F7D00000001 /* SubsonicSwiftApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000000299C8F7D00000001 /* SubsonicSwiftApp.swift */; };
 		A1000003299C8F7D00000001 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1000002299C8F7D00000001 /* ContentView.swift */; };
 		A1000005299C8F7D00000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A1000004299C8F7D00000001 /* Assets.xcassets */; };
@@ -39,6 +45,12 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		6A680CC52F2FA0D500220D05 /* BackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundView.swift; sourceTree = "<group>"; };
+		6A680CC72F2FA0E500220D05 /* LaunchScreenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchScreenView.swift; sourceTree = "<group>"; };
+		6A680CC82F2FA0E500220D05 /* PixelButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PixelButton.swift; sourceTree = "<group>"; };
+		6A680CCB2F2FA0F800220D05 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		6A680CCD2F2FA10200220D05 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		6A680CCF2F2FA11000220D05 /* AppearanceSettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppearanceSettingsView.swift; sourceTree = "<group>"; };
 		A1000000299C8F7D00000001 /* SubsonicSwiftApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubsonicSwiftApp.swift; sourceTree = "<group>"; };
 		A1000002299C8F7D00000001 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		A1000004299C8F7D00000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -117,6 +129,7 @@
 		A100000C299C8F7D00000001 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				6A680CCB2F2FA0F800220D05 /* AppSettings.swift */,
 				A100000F299C8F7D00000001 /* Artist.swift */,
 				A1000020299C8F7D00000001 /* Album.swift */,
 				A1000021299C8F7D00000001 /* Song.swift */,
@@ -130,6 +143,7 @@
 		A100000D299C8F7D00000001 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				6A680CCD2F2FA10200220D05 /* SettingsManager.swift */,
 				A1000025299C8F7D00000001 /* SubsonicClient.swift */,
 				A1000026299C8F7D00000001 /* AudioPlayer.swift */,
 				A1000027299C8F7D00000001 /* DownloadManager.swift */,
@@ -211,6 +225,7 @@
 		A1000056299C8F7D00000001 /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				6A680CCF2F2FA11000220D05 /* AppearanceSettingsView.swift */,
 				A1000047299C8F7D00000001 /* ServerSetupView.swift */,
 			);
 			path = Settings;
@@ -219,7 +234,10 @@
 		A1000057299C8F7D00000001 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				6A680CC72F2FA0E500220D05 /* LaunchScreenView.swift */,
+				6A680CC82F2FA0E500220D05 /* PixelButton.swift */,
 				A1000048299C8F7D00000001 /* PlaceholderArtView.swift */,
+				6A680CC52F2FA0D500220D05 /* BackgroundView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -300,9 +318,13 @@
 				A1000012299C8F7D00000001 /* Song.swift in Sources */,
 				A1000013299C8F7D00000001 /* Playlist.swift in Sources */,
 				A1000014299C8F7D00000001 /* ServerConfig.swift in Sources */,
+				6A680CC92F2FA0E500220D05 /* PixelButton.swift in Sources */,
+				6A680CCA2F2FA0E500220D05 /* LaunchScreenView.swift in Sources */,
 				A1000015299C8F7D00000001 /* DownloadedSong.swift in Sources */,
 				A1000016299C8F7D00000001 /* SubsonicClient.swift in Sources */,
+				6A680CC62F2FA0D500220D05 /* BackgroundView.swift in Sources */,
 				A1000017299C8F7D00000001 /* AudioPlayer.swift in Sources */,
+				6A680CD02F2FA11000220D05 /* AppearanceSettingsView.swift in Sources */,
 				A1000018299C8F7D00000001 /* DownloadManager.swift in Sources */,
 				A1000019299C8F7D00000001 /* KeychainService.swift in Sources */,
 				A100001A299C8F7D00000001 /* SubsonicAuth.swift in Sources */,
@@ -310,6 +332,7 @@
 				A100001C299C8F7D00000001 /* LibraryViewModel.swift in Sources */,
 				A100001D299C8F7D00000001 /* PlayerViewModel.swift in Sources */,
 				A100001E299C8F7D00000001 /* SearchViewModel.swift in Sources */,
+				6A680CCE2F2FA10200220D05 /* SettingsManager.swift in Sources */,
 				A100001F299C8F7D00000001 /* DownloadsViewModel.swift in Sources */,
 				A1000030299C8F7D00000001 /* ArtistsView.swift in Sources */,
 				A1000031299C8F7D00000001 /* AlbumsView.swift in Sources */,
@@ -320,6 +343,7 @@
 				A1000036299C8F7D00000001 /* SearchView.swift in Sources */,
 				A1000037299C8F7D00000001 /* DownloadsView.swift in Sources */,
 				A1000038299C8F7D00000001 /* ServerSetupView.swift in Sources */,
+				6A680CCC2F2FA0F800220D05 /* AppSettings.swift in Sources */,
 				A1000039299C8F7D00000001 /* PlaceholderArtView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
