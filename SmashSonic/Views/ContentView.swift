@@ -376,6 +376,7 @@ struct PlaylistRow: View {
 struct PlaylistDetailView: View {
     let playlist: Playlist
     @ObservedObject var viewModel: LibraryViewModel
+    @ObservedObject private var settingsManager = SettingsManager.shared
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject private var downloadsViewModel = DownloadsViewModel()
     @State private var loadedPlaylist: Playlist?
@@ -385,7 +386,11 @@ struct PlaylistDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
+        ZStack {
+            backgroundView
+                .ignoresSafeArea()
+
+            ScrollView {
             VStack(spacing: 0) {
                 // Header
                 VStack(spacing: 16) {
@@ -454,9 +459,9 @@ struct PlaylistDetailView: View {
                     .padding(.bottom, 80)
                 }
             }
+            }
+            .scrollContentBackground(.hidden)
         }
-        .scrollContentBackground(.hidden)
-        .background(Color.clear)
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
@@ -466,6 +471,24 @@ struct PlaylistDetailView: View {
         .overlay {
             if loadedPlaylist == nil {
                 ProgressView()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        GeometryReader { geo in
+            if let color = settingsManager.backgroundType.solidColor {
+                color
+            } else if let imageName = settingsManager.backgroundType.imageName {
+                Image(imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .opacity(0.3)
+            } else {
+                Color(.systemBackground)
             }
         }
     }

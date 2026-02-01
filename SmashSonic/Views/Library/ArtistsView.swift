@@ -98,24 +98,29 @@ struct ArtistRow: View {
 struct ArtistDetailView: View {
     let artist: Artist
     @ObservedObject var viewModel: LibraryViewModel
+    @ObservedObject private var settingsManager = SettingsManager.shared
     @State private var artistDetail: ArtistDetail?
 
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                if let albums = artistDetail?.albums {
-                    ForEach(albums) { album in
-                        NavigationLink(destination: AlbumDetailView(album: album)) {
-                            AlbumRow(album: album)
+        ZStack {
+            backgroundView
+                .ignoresSafeArea()
+
+            ScrollView {
+                LazyVStack(spacing: 8) {
+                    if let albums = artistDetail?.albums {
+                        ForEach(albums) { album in
+                            NavigationLink(destination: AlbumDetailView(album: album)) {
+                                AlbumRow(album: album)
+                            }
+                            .buttonStyle(.plain)
                         }
-                        .buttonStyle(.plain)
-                        Divider()
                     }
                 }
+                .padding(.vertical)
             }
+            .scrollContentBackground(.hidden)
         }
-        .scrollContentBackground(.hidden)
-        .background(Color.clear)
         .navigationTitle(artist.name)
         .toolbarBackground(.hidden, for: .navigationBar)
         .task {
@@ -124,6 +129,24 @@ struct ArtistDetailView: View {
         .overlay {
             if artistDetail == nil {
                 ProgressView()
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        GeometryReader { geo in
+            if let color = settingsManager.backgroundType.solidColor {
+                color
+            } else if let imageName = settingsManager.backgroundType.imageName {
+                Image(imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .opacity(0.3)
+            } else {
+                Color(.systemBackground)
             }
         }
     }

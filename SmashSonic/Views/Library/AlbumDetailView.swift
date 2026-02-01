@@ -3,6 +3,7 @@ import SwiftUI
 struct AlbumDetailView: View {
     let album: Album
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    @ObservedObject private var settingsManager = SettingsManager.shared
     @StateObject private var viewModel = LibraryViewModel()
     @StateObject private var downloadsViewModel = DownloadsViewModel()
     @State private var loadedAlbum: Album?
@@ -133,12 +134,30 @@ struct AlbumDetailView: View {
             }
         }
         .scrollContentBackground(.hidden)
-        .background(Color.clear)
+        .background(backgroundView.ignoresSafeArea())
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.hidden, for: .navigationBar)
         .task {
             loadedAlbum = await viewModel.loadAlbum(id: album.id)
+        }
+    }
+
+    @ViewBuilder
+    private var backgroundView: some View {
+        GeometryReader { geo in
+            if let color = settingsManager.backgroundType.solidColor {
+                color
+            } else if let imageName = settingsManager.backgroundType.imageName {
+                Image(imageName)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: geo.size.width, height: geo.size.height)
+                    .clipped()
+                    .opacity(0.3)
+            } else {
+                Color(.systemBackground)
+            }
         }
     }
 }
