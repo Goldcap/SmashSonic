@@ -12,31 +12,30 @@ struct ContentView: View {
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Background layer - uses Color.clear to establish size, then overlays the actual background
-            Color.clear
-                .overlay(BackgroundView())
-                .ignoresSafeArea()
-
             TabView(selection: $selectedTab) {
                 HomeView(viewModel: libraryViewModel)
+                    .appBackground()
                     .tabItem {
                         Label("Home", systemImage: "house")
                     }
                     .tag(0)
 
                 BrowseView(viewModel: libraryViewModel)
+                    .appBackground()
                     .tabItem {
                         Label("Browse", systemImage: "square.grid.2x2")
                     }
                     .tag(1)
 
                 SearchView(viewModel: searchViewModel)
+                    .appBackground()
                     .tabItem {
                         Label("Search", systemImage: "magnifyingglass")
                     }
                     .tag(2)
 
                 DownloadsView(viewModel: downloadsViewModel)
+                    .appBackground()
                     .tabItem {
                         Label("Downloads", systemImage: "arrow.down.circle")
                     }
@@ -45,13 +44,13 @@ struct ContentView: View {
                 NavigationStack {
                     ServerSetupView()
                 }
+                .appBackground()
                     .tabItem {
                         Label("Settings", systemImage: "gear")
                     }
                     .tag(4)
             }
             .scrollContentBackground(.hidden)
-            .toolbarBackground(.hidden, for: .tabBar)
 
             if playerViewModel.currentSong != nil {
                 VStack(spacing: 0) {
