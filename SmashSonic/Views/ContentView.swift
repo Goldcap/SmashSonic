@@ -10,6 +10,7 @@ struct ContentView: View {
     @ObservedObject private var client = SubsonicClient.shared
 
     @State private var selectedTab = 0
+    @State private var showMenu = false
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -17,21 +18,15 @@ struct ContentView: View {
             Group {
                 switch selectedTab {
                 case 0:
-                    HomeView(viewModel: libraryViewModel, likesViewModel: likesViewModel)
+                    HomeView(viewModel: libraryViewModel, likesViewModel: likesViewModel, showMenu: $showMenu)
                 case 1:
-                    BrowseView(viewModel: libraryViewModel)
+                    BrowseView(viewModel: libraryViewModel, showMenu: $showMenu)
                 case 2:
-                    LikedSongsView(viewModel: likesViewModel)
+                    LikedSongsView(viewModel: likesViewModel, showMenu: $showMenu)
                 case 3:
-                    SearchView(viewModel: searchViewModel)
-                case 4:
-                    DownloadsView(viewModel: downloadsViewModel)
-                case 5:
-                    NavigationStack {
-                        ServerSetupView()
-                    }
+                    SearchView(viewModel: searchViewModel, showMenu: $showMenu)
                 default:
-                    HomeView(viewModel: libraryViewModel, likesViewModel: likesViewModel)
+                    HomeView(viewModel: libraryViewModel, likesViewModel: likesViewModel, showMenu: $showMenu)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -45,10 +40,23 @@ struct ContentView: View {
             }
 
             // Custom tab bar
-            CustomTabBar(selectedTab: $selectedTab, showMiniPlayer: playerViewModel.currentSong != nil)
+            CustomTabBar(
+                selectedTab: $selectedTab,
+                showMiniPlayer: playerViewModel.currentSong != nil,
+                onRandomTap: {
+                    playerViewModel.startRandomPlayback()
+                }
+            )
         }
         .sheet(isPresented: $playerViewModel.showFullPlayer) {
             NowPlayingView()
+        }
+        .sheet(isPresented: $showMenu) {
+            MenuView(
+                selectedTab: $selectedTab,
+                showMenu: $showMenu,
+                downloadsViewModel: downloadsViewModel
+            )
         }
         .onAppear {
             DownloadManager.shared.setModelContext(modelContext)
@@ -69,21 +77,26 @@ struct ContentView: View {
 struct CustomTabBar: View {
     @Binding var selectedTab: Int
     var showMiniPlayer: Bool
+    var onRandomTap: () -> Void
 
-    private let tabs: [(icon: String, systemIcon: String?, label: String)] = [
-        ("PixelHome", nil, "Home"),
-        ("PixelBrowse", nil, "Browse"),
-        ("PixelHeart", "heart.fill", "Liked"),
-        ("PixelSearch", nil, "Search"),
-        ("PixelDownloads", nil, "Downloads"),
-        ("PixelSettings", nil, "Settings")
+    // Tabs: Home, Browse, Liked, Search, Random
+    private let tabs: [(icon: String, systemIcon: String?, label: String, isAction: Bool)] = [
+        ("PixelHome", nil, "Home", false),
+        ("PixelBrowse", nil, "Browse", false),
+        ("PixelHeart", "heart.fill", "Liked", false),
+        ("PixelSearch", nil, "Search", false),
+        ("PixelRandom", "shuffle", "Random", true)
     ]
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(0..<tabs.count, id: \.self) { index in
                 Button {
-                    selectedTab = index
+                    if tabs[index].isAction {
+                        onRandomTap()
+                    } else {
+                        selectedTab = index
+                    }
                 } label: {
                     VStack(spacing: 4) {
                         if UIImage(named: tabs[index].icon) != nil {
@@ -93,12 +106,12 @@ struct CustomTabBar: View {
                                 .interpolation(.none)
                                 .scaledToFit()
                                 .frame(width: 36, height: 36)
-                                .opacity(selectedTab == index ? 1.0 : 0.5)
+                                .opacity(tabs[index].isAction ? 1.0 : (selectedTab == index ? 1.0 : 0.5))
                         } else if let systemIcon = tabs[index].systemIcon {
                             Image(systemName: systemIcon)
                                 .font(.system(size: 24))
                                 .frame(width: 36, height: 36)
-                                .foregroundStyle(selectedTab == index ? .red : .secondary)
+                                .foregroundStyle(tabs[index].isAction ? .accentColor : (selectedTab == index ? .red : .secondary))
                         } else {
                             Image(systemName: "questionmark.circle")
                                 .font(.system(size: 24))
@@ -108,7 +121,7 @@ struct CustomTabBar: View {
 
                         Text(tabs[index].label)
                             .font(.system(size: 10))
-                            .foregroundColor(selectedTab == index ? .primary : .secondary)
+                            .foregroundColor(tabs[index].isAction ? .accentColor : (selectedTab == index ? .primary : .secondary))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
@@ -126,11 +139,110 @@ struct CustomTabBar: View {
     }
 }
 
+// MARK: - Menu View
+
+struct MenuView: View {
+    @Binding var selectedTab: Int
+    @Binding var showMenu: Bool
+    @ObservedObject var downloadsViewModel: DownloadsViewModel
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section("Navigation") {
+                    MenuRow(icon: "PixelHome", systemIcon: "house.fill", label: "Home") {
+                        selectedTab = 0
+                        dismiss()
+                    }
+                    MenuRow(icon: "PixelBrowse", systemIcon: "square.grid.2x2.fill", label: "Browse") {
+                        selectedTab = 1
+                        dismiss()
+                    }
+                    MenuRow(icon: "PixelHeart", systemIcon: "heart.fill", label: "Liked Songs") {
+                        selectedTab = 2
+                        dismiss()
+                    }
+                    MenuRow(icon: "PixelSearch", systemIcon: "magnifyingglass", label: "Search") {
+                        selectedTab = 3
+                        dismiss()
+                    }
+                }
+
+                Section("Library") {
+                    NavigationLink {
+                        DownloadsView(viewModel: downloadsViewModel)
+                    } label: {
+                        MenuRowLabel(icon: "PixelDownloads", systemIcon: "arrow.down.circle.fill", label: "Downloads")
+                    }
+                }
+
+                Section("Settings") {
+                    NavigationLink {
+                        ServerSetupView()
+                    } label: {
+                        MenuRowLabel(icon: "PixelSettings", systemIcon: "gearshape.fill", label: "Server Settings")
+                    }
+                }
+            }
+            .listStyle(.insetGrouped)
+            .navigationTitle("Menu")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Done") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+}
+
+struct MenuRow: View {
+    let icon: String
+    let systemIcon: String
+    let label: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            MenuRowLabel(icon: icon, systemIcon: systemIcon, label: label)
+        }
+    }
+}
+
+struct MenuRowLabel: View {
+    let icon: String
+    let systemIcon: String
+    let label: String
+
+    var body: some View {
+        HStack(spacing: 12) {
+            if UIImage(named: icon) != nil {
+                Image(icon)
+                    .renderingMode(.original)
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFit()
+                    .frame(width: 28, height: 28)
+            } else {
+                Image(systemName: systemIcon)
+                    .font(.system(size: 20))
+                    .frame(width: 28, height: 28)
+                    .foregroundStyle(.accentColor)
+            }
+            Text(label)
+        }
+    }
+}
+
 // MARK: - Home View
 
 struct HomeView: View {
     @ObservedObject var viewModel: LibraryViewModel
     @ObservedObject var likesViewModel: LikesViewModel
+    @Binding var showMenu: Bool
     @ObservedObject private var settingsManager = SettingsManager.shared
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.modelContext) private var modelContext
@@ -249,6 +361,16 @@ struct HomeView: View {
             }
             .navigationTitle("Home")
             .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showMenu = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.title3)
+                    }
+                }
+            }
             .refreshable {
                 await viewModel.loadHomeData()
             }
@@ -291,6 +413,7 @@ struct HomeView: View {
 
 struct BrowseView: View {
     @ObservedObject var viewModel: LibraryViewModel
+    @Binding var showMenu: Bool
     @ObservedObject private var settingsManager = SettingsManager.shared
     @State private var selectedSection = 0
 
@@ -320,6 +443,16 @@ struct BrowseView: View {
             }
             .navigationTitle("Browse")
             .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showMenu = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.title3)
+                    }
+                }
+            }
         }
     }
 

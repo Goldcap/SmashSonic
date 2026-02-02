@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SearchView: View {
     @ObservedObject var viewModel: SearchViewModel
+    @Binding var showMenu: Bool
     @ObservedObject private var settingsManager = SettingsManager.shared
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject private var downloadsViewModel = DownloadsViewModel()
@@ -131,6 +132,16 @@ struct SearchView: View {
             }
             .navigationTitle("Search")
             .toolbarBackground(.hidden, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showMenu = true
+                    } label: {
+                        Image(systemName: "line.3.horizontal")
+                            .font(.title3)
+                    }
+                }
+            }
         }
     }
 

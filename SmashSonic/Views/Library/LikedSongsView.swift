@@ -3,6 +3,7 @@ import SwiftData
 
 struct LikedSongsView: View {
     @ObservedObject var viewModel: LikesViewModel
+    var showMenu: Binding<Bool>? = nil
     @ObservedObject private var settingsManager = SettingsManager.shared
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.modelContext) private var modelContext
@@ -71,6 +72,16 @@ struct LikedSongsView: View {
                 await syncFromServer()
             }
             .toolbar {
+                if let showMenu = showMenu {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Button {
+                            showMenu.wrappedValue = true
+                        } label: {
+                            Image(systemName: "line.3.horizontal")
+                                .font(.title3)
+                        }
+                    }
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button {
