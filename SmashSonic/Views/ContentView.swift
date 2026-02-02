@@ -40,7 +40,7 @@ struct ContentView: View {
             if playerViewModel.currentSong != nil {
                 VStack(spacing: 0) {
                     MiniPlayerView()
-                        .padding(.bottom, 70)
+                        .padding(.bottom, 120)
                 }
             }
 
