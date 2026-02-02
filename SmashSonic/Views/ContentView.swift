@@ -35,7 +35,7 @@ struct ContentView: View {
             if playerViewModel.currentSong != nil {
                 VStack(spacing: 0) {
                     MiniPlayerView()
-                        .padding(.bottom, 100)
+                        .padding(.bottom, 92)
                 }
             }
 
@@ -145,6 +145,7 @@ struct MenuView: View {
     @Binding var selectedTab: Int
     @Binding var showMenu: Bool
     @ObservedObject var downloadsViewModel: DownloadsViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
@@ -165,6 +166,13 @@ struct MenuView: View {
                     }
                     MenuRow(icon: "PixelSearch", systemIcon: "magnifyingglass", label: "Search") {
                         selectedTab = 3
+                        dismiss()
+                    }
+                }
+
+                Section("Playback") {
+                    MenuRow(icon: "PixelRandom", systemIcon: "shuffle", label: "Play Random") {
+                        playerViewModel.startRandomPlayback()
                         dismiss()
                     }
                 }
@@ -247,7 +255,6 @@ struct HomeView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \LikedSong.likedAt, order: .reverse) private var likedSongs: [LikedSong]
-    @State private var isLoadingRandom = false
 
     var body: some View {
         NavigationStack {
@@ -280,29 +287,6 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.top, 50)
                         } else {
-                            // Quick Actions
-                            HStack(spacing: 12) {
-                                Button {
-                                    Task { await playRandomSongs() }
-                                } label: {
-                                    HStack {
-                                        if isLoadingRandom {
-                                            ProgressView()
-                                                .tint(.primary)
-                                        } else {
-                                            Image(systemName: "shuffle")
-                                        }
-                                        Text("Play Random")
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.accentColor.opacity(0.2))
-                                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                                }
-                                .disabled(isLoadingRandom)
-                            }
-                            .padding(.horizontal)
-
                             // Liked Songs Section
                             if !likedSongs.isEmpty {
                                 NavigationLink(destination: LikedSongsView(viewModel: likesViewModel)) {
@@ -398,14 +382,6 @@ struct HomeView: View {
                 Color(.systemBackground)
             }
         }
-    }
-
-    private func playRandomSongs() async {
-        isLoadingRandom = true
-        playerViewModel.startRandomPlayback()
-        // Small delay to let the loading start
-        try? await Task.sleep(nanoseconds: 500_000_000)
-        isLoadingRandom = false
     }
 }
 

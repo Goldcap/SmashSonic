@@ -65,6 +65,11 @@ struct MiniPlayerView: View {
             }
             .padding(.horizontal)
             .padding(.vertical, 8)
+
+            // Cyan bottom border
+            Rectangle()
+                .fill(Color.cyan)
+                .frame(height: 2)
         }
         .background(.ultraThinMaterial)
         .onTapGesture {
