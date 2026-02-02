@@ -180,7 +180,7 @@ struct QueueSongRow: View {
         HStack(spacing: 12) {
             if isCurrentlyPlaying {
                 Image(systemName: isPlaying ? "speaker.wave.2.fill" : "speaker.fill")
-                    .foregroundStyle(.accentColor)
+                    .foregroundStyle(Color.accentColor)
                     .frame(width: 24)
             }
 

@@ -111,7 +111,7 @@ struct CustomTabBar: View {
                             Image(systemName: systemIcon)
                                 .font(.system(size: 24))
                                 .frame(width: 36, height: 36)
-                                .foregroundStyle(tabs[index].isAction ? .accentColor : (selectedTab == index ? .red : .secondary))
+                                .foregroundStyle(tabs[index].isAction ? Color.accentColor : (selectedTab == index ? .red : .secondary))
                         } else {
                             Image(systemName: "questionmark.circle")
                                 .font(.system(size: 24))
@@ -230,7 +230,7 @@ struct MenuRowLabel: View {
                 Image(systemName: systemIcon)
                     .font(.system(size: 20))
                     .frame(width: 28, height: 28)
-                    .foregroundStyle(.accentColor)
+                    .foregroundStyle(Color.accentColor)
             }
             Text(label)
         }

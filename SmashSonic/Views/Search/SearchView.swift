@@ -249,6 +249,6 @@ struct SearchAlbumCard: View {
 }
 
 #Preview {
-    SearchView(viewModel: SearchViewModel())
+    SearchView(viewModel: SearchViewModel(), showMenu: .constant(false))
         .environmentObject(PlayerViewModel())
 }
