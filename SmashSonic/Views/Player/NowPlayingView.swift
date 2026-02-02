@@ -26,15 +26,12 @@ struct NowPlayingView: View {
                 Color.black.ignoresSafeArea()
             }
 
-            VStack(spacing: 20) {
+            VStack(spacing: 16) {
                 // Drag handle
                 Capsule()
                     .fill(Color.white.opacity(0.3))
                     .frame(width: 40, height: 5)
                     .padding(.top, 8)
-
-                Spacer()
-                    .frame(maxHeight: 40)
 
                 // Album Art
                 AsyncImage(url: playerViewModel.currentSong?.coverArt.flatMap { SubsonicClient.shared.coverArtURL(for: $0, size: 600) }) { image in
@@ -49,7 +46,7 @@ struct NowPlayingView: View {
                 .shadow(radius: 20)
 
                 // Track Info
-                VStack(spacing: 8) {
+                VStack(spacing: 4) {
                     Text(playerViewModel.currentSong?.title ?? "Not Playing")
                         .font(.title2)
                         .fontWeight(.bold)
@@ -80,7 +77,6 @@ struct NowPlayingView: View {
                         .font(.title2)
                         .foregroundStyle(likesViewModel.isLiked(playerViewModel.currentSong?.id ?? "") ? .red : .white)
                 }
-                .padding(.top, 8)
 
                 // Progress Bar
                 VStack(spacing: 8) {
@@ -156,7 +152,6 @@ struct NowPlayingView: View {
                 .foregroundStyle(.white.opacity(0.7))
 
                 Spacer()
-                    .frame(maxHeight: 60)
             }
             .padding()
         }

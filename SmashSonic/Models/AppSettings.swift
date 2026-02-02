@@ -78,5 +78,5 @@ enum BackgroundType: String, CaseIterable, Codable {
 struct AppSettings: Codable {
     var backgroundType: BackgroundType
 
-    static let `default` = AppSettings(backgroundType: .none)
+    static let `default` = AppSettings(backgroundType: .solidBlack)
 }
