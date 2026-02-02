@@ -203,6 +203,35 @@ final class AudioPlayer: ObservableObject {
         queue.append(contentsOf: songs)
     }
 
+    /// Play this song immediately, keeping the rest of the queue
+    func playNow(_ song: Song) {
+        if queue.isEmpty {
+            playSong(song)
+        } else {
+            // Insert after current and play it
+            queue.insert(song, at: currentIndex + 1)
+            next()
+        }
+    }
+
+    /// Add song to play right after the current song
+    func playNext(_ song: Song) {
+        if queue.isEmpty {
+            queue = [song]
+        } else {
+            queue.insert(song, at: currentIndex + 1)
+        }
+    }
+
+    /// Add song to the end of the queue
+    func playLast(_ song: Song) {
+        if queue.isEmpty {
+            queue = [song]
+        } else {
+            queue.append(song)
+        }
+    }
+
     func removeFromQueue(at index: Int) {
         guard index >= 0 && index < queue.count else { return }
         guard index != currentIndex else { return } // Don't remove currently playing

@@ -140,6 +140,21 @@ final class PlayerViewModel: ObservableObject {
         audioPlayer.clearQueue()
     }
 
+    /// Play this song immediately
+    func playNow(_ song: Song) {
+        audioPlayer.playNow(song)
+    }
+
+    /// Add song to play right after current song
+    func playNext(_ song: Song) {
+        audioPlayer.playNext(song)
+    }
+
+    /// Add song to end of queue
+    func playLast(_ song: Song) {
+        audioPlayer.playLast(song)
+    }
+
     var upcomingSongs: [Song] {
         guard currentIndex < queue.count else { return [] }
         return Array(queue.suffix(from: currentIndex + 1))
@@ -147,6 +162,8 @@ final class PlayerViewModel: ObservableObject {
 
     var playedSongs: [Song] {
         guard currentIndex > 0 else { return [] }
-        return Array(queue.prefix(currentIndex))
+        let played = Array(queue.prefix(currentIndex))
+        // Limit to last 20 played songs
+        return Array(played.suffix(20))
     }
 }

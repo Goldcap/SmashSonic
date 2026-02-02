@@ -223,6 +223,28 @@ struct SongRow: View {
                     Label("Play", systemImage: "play")
                 }
 
+                Divider()
+
+                Button {
+                    playerViewModel.playNow(song)
+                } label: {
+                    Label("Play Now", systemImage: "play.circle")
+                }
+
+                Button {
+                    playerViewModel.playNext(song)
+                } label: {
+                    Label("Play Next", systemImage: "text.line.first.and.arrowtriangle.forward")
+                }
+
+                Button {
+                    playerViewModel.playLast(song)
+                } label: {
+                    Label("Play Last", systemImage: "text.line.last.and.arrowtriangle.forward")
+                }
+
+                Divider()
+
                 Button {
                     likesViewModel.toggleLike(song, context: modelContext)
                 } label: {

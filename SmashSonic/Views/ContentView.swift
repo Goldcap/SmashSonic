@@ -45,11 +45,17 @@ struct ContentView: View {
                 showMiniPlayer: playerViewModel.currentSong != nil,
                 onRandomTap: {
                     playerViewModel.startRandomPlayback()
+                },
+                onQueueTap: {
+                    playerViewModel.showQueue = true
                 }
             )
         }
         .sheet(isPresented: $playerViewModel.showFullPlayer) {
             NowPlayingView()
+        }
+        .sheet(isPresented: $playerViewModel.showQueue) {
+            QueueView()
         }
         .sheet(isPresented: $showMenu) {
             MenuView(
@@ -78,26 +84,36 @@ struct CustomTabBar: View {
     @Binding var selectedTab: Int
     var showMiniPlayer: Bool
     var onRandomTap: () -> Void
+    var onQueueTap: () -> Void
 
-    // Tabs: Home, Browse, Liked, Search, Random
-    private let tabs: [(icon: String, systemIcon: String?, label: String, isAction: Bool)] = [
-        ("PixelHome", nil, "Home", false),
-        ("PixelBrowse", nil, "Browse", false),
-        ("PixelHeart", "heart.fill", "Liked", false),
-        ("PixelSearch", nil, "Search", false),
-        ("PixelRandom", "shuffle", "Random", true)
+    private enum TabAction: String {
+        case none, random, queue
+    }
+
+    // Tabs: Home, Browse, Liked, Search, Queue, Random
+    private let tabs: [(icon: String, systemIcon: String?, label: String, action: TabAction)] = [
+        ("PixelHome", nil, "Home", .none),
+        ("PixelBrowse", nil, "Browse", .none),
+        ("PixelHeart", "heart.fill", "Liked", .none),
+        ("PixelSearch", nil, "Search", .none),
+        ("PixelQueue", "music.note.list", "Queue", .queue),
+        ("PixelRandom", "shuffle", "Random", .random)
     ]
 
     var body: some View {
         HStack(spacing: 0) {
             ForEach(0..<tabs.count, id: \.self) { index in
                 Button {
-                    if tabs[index].isAction {
-                        onRandomTap()
-                    } else {
+                    switch tabs[index].action {
+                    case .none:
                         selectedTab = index
+                    case .random:
+                        onRandomTap()
+                    case .queue:
+                        onQueueTap()
                     }
                 } label: {
+                    let isActionTab = tabs[index].action != .none
                     VStack(spacing: 4) {
                         if UIImage(named: tabs[index].icon) != nil {
                             Image(tabs[index].icon)
@@ -106,12 +122,12 @@ struct CustomTabBar: View {
                                 .interpolation(.none)
                                 .scaledToFit()
                                 .frame(width: 36, height: 36)
-                                .opacity(tabs[index].isAction ? 1.0 : (selectedTab == index ? 1.0 : 0.5))
+                                .opacity(isActionTab ? 1.0 : (selectedTab == index ? 1.0 : 0.5))
                         } else if let systemIcon = tabs[index].systemIcon {
                             Image(systemName: systemIcon)
                                 .font(.system(size: 24))
                                 .frame(width: 36, height: 36)
-                                .foregroundStyle(tabs[index].isAction ? Color.accentColor : (selectedTab == index ? .red : .secondary))
+                                .foregroundStyle(isActionTab ? Color.accentColor : (selectedTab == index ? .red : .secondary))
                         } else {
                             Image(systemName: "questionmark.circle")
                                 .font(.system(size: 24))
@@ -121,7 +137,7 @@ struct CustomTabBar: View {
 
                         Text(tabs[index].label)
                             .font(.system(size: 10))
-                            .foregroundColor(tabs[index].isAction ? .accentColor : (selectedTab == index ? .primary : .secondary))
+                            .foregroundColor(isActionTab ? .accentColor : (selectedTab == index ? .primary : .secondary))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
@@ -174,6 +190,12 @@ struct MenuView: View {
                     MenuRow(icon: "PixelRandom", systemIcon: "shuffle", label: "Play Random") {
                         playerViewModel.startRandomPlayback()
                         dismiss()
+                    }
+                    MenuRow(icon: "PixelQueue", systemIcon: "music.note.list", label: "Play Queue") {
+                        dismiss()
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                            playerViewModel.showQueue = true
+                        }
                     }
                 }
 
