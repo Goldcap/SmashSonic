@@ -72,17 +72,7 @@ struct LikedSongsView: View {
                 await syncFromServer()
             }
             .toolbar {
-                if let showMenu = showMenu {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button {
-                            showMenu.wrappedValue = true
-                        } label: {
-                            Image(systemName: "line.3.horizontal")
-                                .font(.title3)
-                        }
-                    }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItem(placement: .topBarLeading) {
                     Menu {
                         Button {
                             Task { await syncFromServer() }
@@ -113,6 +103,16 @@ struct LikedSongsView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                    }
+                }
+                if let showMenu = showMenu {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showMenu.wrappedValue = true
+                        } label: {
+                            Image(systemName: "line.3.horizontal")
+                                .font(.title3)
+                        }
                     }
                 }
             }
