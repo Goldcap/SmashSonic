@@ -11,16 +11,20 @@ struct QueueView: View {
                 Color.black.opacity(0.95).ignoresSafeArea()
 
                 if playerViewModel.queue.isEmpty {
-                    VStack(spacing: 16) {
+                    VStack {
+                        Spacer()
+                            .frame(height: 100)
                         Image(systemName: "music.note.list")
                             .font(.system(size: 50))
                             .foregroundStyle(.secondary)
                         Text("Queue is Empty")
                             .font(.title2)
                             .fontWeight(.semibold)
+                            .padding(.top, 8)
                         Text("Start playing music or add random songs")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
+                            .padding(.top, 2)
 
                         Button {
                             startRandomPlayback()
@@ -35,8 +39,10 @@ struct QueueView: View {
                             .foregroundStyle(.white)
                             .clipShape(Capsule())
                         }
-                        .padding(.top, 8)
+                        .padding(.top, 16)
+                        Spacer()
                     }
+                    .frame(maxWidth: .infinity)
                 } else {
                     List {
                         // Now Playing
