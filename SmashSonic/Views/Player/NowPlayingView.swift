@@ -7,6 +7,7 @@ struct NowPlayingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var dragOffset: CGFloat = 0
+    @State private var showQueue = false
 
     var body: some View {
         ZStack {
@@ -133,20 +134,33 @@ struct NowPlayingView: View {
                 }
                 .foregroundStyle(.white)
 
-                // Skip Controls
-                HStack(spacing: 60) {
+                // Secondary Controls
+                HStack(spacing: 40) {
                     Button {
                         playerViewModel.skipBackward()
                     } label: {
                         Image(systemName: "gobackward.15")
-                            .font(.system(size: 24))
+                            .font(.system(size: 22))
+                    }
+
+                    Button {
+                        showQueue = true
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "list.bullet")
+                                .font(.system(size: 22))
+                            if playerViewModel.upcomingSongs.count > 0 {
+                                Text("\(playerViewModel.upcomingSongs.count)")
+                                    .font(.caption2)
+                            }
+                        }
                     }
 
                     Button {
                         playerViewModel.skipForward()
                     } label: {
                         Image(systemName: "goforward.15")
-                            .font(.system(size: 24))
+                            .font(.system(size: 22))
                     }
                 }
                 .foregroundStyle(.white.opacity(0.7))
@@ -154,6 +168,9 @@ struct NowPlayingView: View {
                 Spacer()
             }
             .padding()
+        }
+        .sheet(isPresented: $showQueue) {
+            QueueView()
         }
         .gesture(
             DragGesture()

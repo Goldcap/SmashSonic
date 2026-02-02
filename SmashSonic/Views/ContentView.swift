@@ -40,7 +40,7 @@ struct ContentView: View {
             if playerViewModel.currentSong != nil {
                 VStack(spacing: 0) {
                     MiniPlayerView()
-                        .padding(.bottom, 120)
+                        .padding(.bottom, 100)
                 }
             }
 
@@ -280,16 +280,10 @@ struct HomeView: View {
 
     private func playRandomSongs() async {
         isLoadingRandom = true
-        defer { isLoadingRandom = false }
-
-        do {
-            let songs = try await SubsonicClient.shared.getRandomSongs(size: 50)
-            if let first = songs.first {
-                playerViewModel.play(first, queue: songs)
-            }
-        } catch {
-            print("Failed to load random songs: \(error)")
-        }
+        playerViewModel.startRandomPlayback()
+        // Small delay to let the loading start
+        try? await Task.sleep(nanoseconds: 500_000_000)
+        isLoadingRandom = false
     }
 }
 

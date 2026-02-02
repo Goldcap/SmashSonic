@@ -13,8 +13,13 @@ final class AudioPlayer: ObservableObject {
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
     @Published var isLoading = false
+    @Published var shuffleMode = false
+    @Published var autoAddRandomSongs = false
 
     private var player: AVPlayer?
+    private var isLoadingMoreSongs = false
+    private let randomSongThreshold = 5 // When queue has this many songs left, add more
+    private let randomSongsToAdd = 10
     private var timeObserver: Any?
     private var cancellables = Set<AnyCancellable>()
 
@@ -128,10 +133,113 @@ final class AudioPlayer: ObservableObject {
     private func handlePlaybackEnded() {
         if currentIndex < queue.count - 1 {
             next()
+            checkAndReplenishQueue()
+        } else if autoAddRandomSongs {
+            // Try to add more songs and continue
+            Task {
+                await addRandomSongsToQueue()
+                if currentIndex < queue.count - 1 {
+                    await MainActor.run {
+                        next()
+                    }
+                }
+            }
         } else {
             isPlaying = false
             currentTime = 0
         }
+    }
+
+    private func checkAndReplenishQueue() {
+        guard autoAddRandomSongs else { return }
+        let songsRemaining = queue.count - currentIndex - 1
+        if songsRemaining <= randomSongThreshold && !isLoadingMoreSongs {
+            Task {
+                await addRandomSongsToQueue()
+            }
+        }
+    }
+
+    func addRandomSongsToQueue(count: Int? = nil) async {
+        guard !isLoadingMoreSongs else { return }
+        isLoadingMoreSongs = true
+        defer { isLoadingMoreSongs = false }
+
+        do {
+            let songsToAdd = count ?? randomSongsToAdd
+            let randomSongs = try await SubsonicClient.shared.getRandomSongs(size: songsToAdd)
+            await MainActor.run {
+                queue.append(contentsOf: randomSongs)
+            }
+        } catch {
+            print("Failed to load random songs: \(error)")
+        }
+    }
+
+    func startRandomPlayback() async {
+        autoAddRandomSongs = true
+        isLoadingMoreSongs = true
+        defer { isLoadingMoreSongs = false }
+
+        do {
+            let randomSongs = try await SubsonicClient.shared.getRandomSongs(size: 20)
+            await MainActor.run {
+                if let first = randomSongs.first {
+                    self.queue = randomSongs
+                    self.currentIndex = 0
+                    self.loadAndPlay(first)
+                }
+            }
+        } catch {
+            print("Failed to start random playback: \(error)")
+        }
+    }
+
+    func addToQueue(_ song: Song) {
+        queue.append(song)
+    }
+
+    func addToQueue(_ songs: [Song]) {
+        queue.append(contentsOf: songs)
+    }
+
+    func removeFromQueue(at index: Int) {
+        guard index >= 0 && index < queue.count else { return }
+        guard index != currentIndex else { return } // Don't remove currently playing
+
+        queue.remove(at: index)
+        if index < currentIndex {
+            currentIndex -= 1
+        }
+    }
+
+    func moveInQueue(from source: Int, to destination: Int) {
+        guard source != currentIndex else { return } // Don't move currently playing
+
+        let song = queue.remove(at: source)
+        queue.insert(song, at: destination)
+
+        // Adjust currentIndex if needed
+        if source < currentIndex && destination >= currentIndex {
+            currentIndex -= 1
+        } else if source > currentIndex && destination <= currentIndex {
+            currentIndex += 1
+        }
+    }
+
+    func playFromQueue(at index: Int) {
+        guard index >= 0 && index < queue.count else { return }
+        currentIndex = index
+        loadAndPlay(queue[index])
+    }
+
+    func clearQueue() {
+        queue = []
+        currentIndex = 0
+        currentSong = nil
+        player?.pause()
+        isPlaying = false
+        autoAddRandomSongs = false
     }
 
     func play() {
