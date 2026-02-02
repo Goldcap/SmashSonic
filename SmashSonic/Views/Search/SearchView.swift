@@ -5,6 +5,7 @@ struct SearchView: View {
     @ObservedObject private var settingsManager = SettingsManager.shared
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject private var downloadsViewModel = DownloadsViewModel()
+    @StateObject private var likesViewModel = LikesViewModel()
     @FocusState private var isSearchFocused: Bool
 
     var body: some View {
@@ -102,7 +103,7 @@ struct SearchView: View {
                                 if !viewModel.songs.isEmpty {
                                     Section {
                                         ForEach(viewModel.songs) { song in
-                                            SongRow(song: song, songs: viewModel.songs, downloadsViewModel: downloadsViewModel)
+                                            SongRow(song: song, songs: viewModel.songs, downloadsViewModel: downloadsViewModel, likesViewModel: likesViewModel)
                                         }
                                     } header: {
                                         Text("Songs")

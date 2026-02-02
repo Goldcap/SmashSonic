@@ -61,8 +61,9 @@ final class LikesManager: ObservableObject {
 
     private func unlike(_ song: Song, context: ModelContext) async {
         // Remove from local database
+        let songId = song.id
         let descriptor = FetchDescriptor<LikedSong>(
-            predicate: #Predicate { $0.id == song.id }
+            predicate: #Predicate { $0.id == songId }
         )
         if let likedSong = try? context.fetch(descriptor).first {
             context.delete(likedSong)

@@ -4,10 +4,11 @@ struct SongsView: View {
     let songs: [Song]
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject private var downloadsViewModel = DownloadsViewModel()
+    @StateObject private var likesViewModel = LikesViewModel()
 
     var body: some View {
         List(songs) { song in
-            SongRow(song: song, songs: songs, downloadsViewModel: downloadsViewModel)
+            SongRow(song: song, songs: songs, downloadsViewModel: downloadsViewModel, likesViewModel: likesViewModel)
                 .listRowInsets(EdgeInsets())
         }
         .listStyle(.plain)
