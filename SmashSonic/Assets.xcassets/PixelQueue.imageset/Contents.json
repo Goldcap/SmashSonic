@@ -1,19 +1,8 @@
 {
   "images" : [
     {
-      "filename" : "PixelQueue@1x.png",
-      "idiom" : "universal",
-      "scale" : "1x"
-    },
-    {
-      "filename" : "PixelQueue@2x.png",
-      "idiom" : "universal",
-      "scale" : "2x"
-    },
-    {
-      "filename" : "PixelQueue@3x.png",
-      "idiom" : "universal",
-      "scale" : "3x"
+      "filename" : "pixel-queue.png",
+      "idiom" : "universal"
     }
   ],
   "info" : {
