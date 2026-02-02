@@ -193,6 +193,38 @@ final class SubsonicClient: ObservableObject {
     func downloadURL(for songId: String) -> URL? {
         return buildURL(endpoint: "download", additionalParams: ["id": songId])
     }
+
+    // MARK: - Starring
+
+    func star(songId: String) async throws {
+        _ = try await fetchData(endpoint: "star", params: ["id": songId])
+    }
+
+    func unstar(songId: String) async throws {
+        _ = try await fetchData(endpoint: "unstar", params: ["id": songId])
+    }
+
+    func getStarred() async throws -> [Song] {
+        let response = try await fetchData(endpoint: "getStarred2")
+
+        guard let starred = response["starred2"] as? [String: Any],
+              let songs = starred["song"] as? [[String: Any]] else {
+            return []
+        }
+
+        return songs.compactMap { Song(from: $0) }
+    }
+
+    func getRandomSongs(size: Int = 50) async throws -> [Song] {
+        let response = try await fetchData(endpoint: "getRandomSongs", params: ["size": String(size)])
+
+        guard let randomSongs = response["randomSongs"] as? [String: Any],
+              let songs = randomSongs["song"] as? [[String: Any]] else {
+            return []
+        }
+
+        return songs.compactMap { Song(from: $0) }
+    }
 }
 
 // MARK: - Response Types

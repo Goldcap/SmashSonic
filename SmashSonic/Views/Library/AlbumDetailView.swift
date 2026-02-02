@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 struct AlbumDetailView: View {
     let album: Album
@@ -6,6 +7,7 @@ struct AlbumDetailView: View {
     @ObservedObject private var settingsManager = SettingsManager.shared
     @StateObject private var viewModel = LibraryViewModel()
     @StateObject private var downloadsViewModel = DownloadsViewModel()
+    @StateObject private var likesViewModel = LikesViewModel()
     @State private var loadedAlbum: Album?
 
     var displayAlbum: Album {
@@ -131,7 +133,7 @@ struct AlbumDetailView: View {
                     Divider()
                     LazyVStack(spacing: 0) {
                         ForEach(sortedSongs) { song in
-                            SongRow(song: song, songs: sortedSongs, showTrackNumber: true, downloadsViewModel: downloadsViewModel)
+                            SongRow(song: song, songs: sortedSongs, showTrackNumber: true, downloadsViewModel: downloadsViewModel, likesViewModel: likesViewModel)
                             Divider()
                         }
                     }
@@ -173,7 +175,9 @@ struct SongRow: View {
     let songs: [Song]
     var showTrackNumber: Bool = false
     @ObservedObject var downloadsViewModel: DownloadsViewModel
+    @ObservedObject var likesViewModel: LikesViewModel
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    @Environment(\.modelContext) private var modelContext
 
     var body: some View {
         HStack(spacing: 12) {
@@ -217,6 +221,13 @@ struct SongRow: View {
                     playerViewModel.play(song, queue: songs)
                 } label: {
                     Label("Play", systemImage: "play")
+                }
+
+                Button {
+                    likesViewModel.toggleLike(song, context: modelContext)
+                } label: {
+                    Label(likesViewModel.isLiked(song.id) ? "Unlike" : "Like",
+                          systemImage: likesViewModel.isLiked(song.id) ? "heart.fill" : "heart")
                 }
 
                 if downloadsViewModel.isDownloaded(song.id) {

@@ -9,6 +9,7 @@ struct SmashSonicApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             DownloadedSong.self,
+            LikedSong.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

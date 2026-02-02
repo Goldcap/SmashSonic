@@ -1,8 +1,11 @@
 import SwiftUI
+import SwiftData
 
 struct NowPlayingView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    @StateObject private var likesViewModel = LikesViewModel()
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var dragOffset: CGFloat = 0
 
     var body: some View {
@@ -67,6 +70,18 @@ struct NowPlayingView: View {
                     }
                 }
                 .padding(.horizontal)
+
+                // Like Button
+                Button {
+                    if let song = playerViewModel.currentSong {
+                        likesViewModel.toggleLike(song, context: modelContext)
+                    }
+                } label: {
+                    Image(systemName: likesViewModel.isLiked(playerViewModel.currentSong?.id ?? "") ? "heart.fill" : "heart")
+                        .font(.title2)
+                        .foregroundStyle(likesViewModel.isLiked(playerViewModel.currentSong?.id ?? "") ? .red : .white)
+                }
+                .padding(.top, 8)
 
                 // Progress Bar
                 VStack(spacing: 8) {

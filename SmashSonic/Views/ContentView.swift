@@ -6,6 +6,7 @@ struct ContentView: View {
     @StateObject private var libraryViewModel = LibraryViewModel()
     @StateObject private var searchViewModel = SearchViewModel()
     @StateObject private var downloadsViewModel = DownloadsViewModel()
+    @StateObject private var likesViewModel = LikesViewModel()
     @ObservedObject private var client = SubsonicClient.shared
 
     @State private var selectedTab = 0
@@ -16,19 +17,21 @@ struct ContentView: View {
             Group {
                 switch selectedTab {
                 case 0:
-                    HomeView(viewModel: libraryViewModel)
+                    HomeView(viewModel: libraryViewModel, likesViewModel: likesViewModel)
                 case 1:
                     BrowseView(viewModel: libraryViewModel)
                 case 2:
-                    SearchView(viewModel: searchViewModel)
+                    LikedSongsView(viewModel: likesViewModel)
                 case 3:
-                    DownloadsView(viewModel: downloadsViewModel)
+                    SearchView(viewModel: searchViewModel)
                 case 4:
+                    DownloadsView(viewModel: downloadsViewModel)
+                case 5:
                     NavigationStack {
                         ServerSetupView()
                     }
                 default:
-                    HomeView(viewModel: libraryViewModel)
+                    HomeView(viewModel: libraryViewModel, likesViewModel: likesViewModel)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -49,6 +52,7 @@ struct ContentView: View {
         }
         .onAppear {
             DownloadManager.shared.setModelContext(modelContext)
+            LikesManager.shared.setModelContext(modelContext)
         }
         .fullScreenCover(isPresented: .constant(!client.serverConfig.isConfigured)) {
             NavigationStack {
@@ -66,12 +70,13 @@ struct CustomTabBar: View {
     @Binding var selectedTab: Int
     var showMiniPlayer: Bool
 
-    private let tabs: [(icon: String, label: String)] = [
-        ("PixelHome", "Home"),
-        ("PixelBrowse", "Browse"),
-        ("PixelSearch", "Search"),
-        ("PixelDownloads", "Downloads"),
-        ("PixelSettings", "Settings")
+    private let tabs: [(icon: String, systemIcon: String?, label: String)] = [
+        ("PixelHome", nil, "Home"),
+        ("PixelBrowse", nil, "Browse"),
+        ("PixelHeart", "heart.fill", "Liked"),
+        ("PixelSearch", nil, "Search"),
+        ("PixelDownloads", nil, "Downloads"),
+        ("PixelSettings", nil, "Settings")
     ]
 
     var body: some View {
@@ -81,13 +86,25 @@ struct CustomTabBar: View {
                     selectedTab = index
                 } label: {
                     VStack(spacing: 4) {
-                        Image(tabs[index].icon)
-                            .renderingMode(.original)
-                            .resizable()
-                            .interpolation(.none)
-                            .scaledToFit()
-                            .frame(width: 36, height: 36)
-                            .opacity(selectedTab == index ? 1.0 : 0.5)
+                        if UIImage(named: tabs[index].icon) != nil {
+                            Image(tabs[index].icon)
+                                .renderingMode(.original)
+                                .resizable()
+                                .interpolation(.none)
+                                .scaledToFit()
+                                .frame(width: 36, height: 36)
+                                .opacity(selectedTab == index ? 1.0 : 0.5)
+                        } else if let systemIcon = tabs[index].systemIcon {
+                            Image(systemName: systemIcon)
+                                .font(.system(size: 24))
+                                .frame(width: 36, height: 36)
+                                .foregroundStyle(selectedTab == index ? .red : .secondary)
+                        } else {
+                            Image(systemName: "questionmark.circle")
+                                .font(.system(size: 24))
+                                .frame(width: 36, height: 36)
+                                .foregroundStyle(selectedTab == index ? .primary : .secondary)
+                        }
 
                         Text(tabs[index].label)
                             .font(.system(size: 10))
@@ -113,7 +130,12 @@ struct CustomTabBar: View {
 
 struct HomeView: View {
     @ObservedObject var viewModel: LibraryViewModel
+    @ObservedObject var likesViewModel: LikesViewModel
     @ObservedObject private var settingsManager = SettingsManager.shared
+    @EnvironmentObject var playerViewModel: PlayerViewModel
+    @Environment(\.modelContext) private var modelContext
+    @Query(sort: \LikedSong.likedAt, order: .reverse) private var likedSongs: [LikedSong]
+    @State private var isLoadingRandom = false
 
     var body: some View {
         NavigationStack {
@@ -146,6 +168,55 @@ struct HomeView: View {
                             .frame(maxWidth: .infinity)
                             .padding(.top, 50)
                         } else {
+                            // Quick Actions
+                            HStack(spacing: 12) {
+                                Button {
+                                    Task { await playRandomSongs() }
+                                } label: {
+                                    HStack {
+                                        if isLoadingRandom {
+                                            ProgressView()
+                                                .tint(.primary)
+                                        } else {
+                                            Image(systemName: "shuffle")
+                                        }
+                                        Text("Play Random")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.accentColor.opacity(0.2))
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                                .disabled(isLoadingRandom)
+                            }
+                            .padding(.horizontal)
+
+                            // Liked Songs Section
+                            if !likedSongs.isEmpty {
+                                NavigationLink(destination: LikedSongsView(viewModel: likesViewModel)) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "heart.fill")
+                                            .foregroundStyle(.red)
+                                            .font(.title2)
+                                        VStack(alignment: .leading) {
+                                            Text("Liked Songs")
+                                                .font(.headline)
+                                            Text("\(likedSongs.count) tracks")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "chevron.right")
+                                            .foregroundStyle(.tertiary)
+                                    }
+                                    .padding()
+                                    .background(Color.black.opacity(0.5))
+                                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                                }
+                                .buttonStyle(.plain)
+                                .padding(.horizontal)
+                            }
+
                             // Random Albums
                             if !viewModel.randomAlbums.isEmpty {
                                 AlbumSection(
@@ -204,6 +275,20 @@ struct HomeView: View {
             } else {
                 Color(.systemBackground)
             }
+        }
+    }
+
+    private func playRandomSongs() async {
+        isLoadingRandom = true
+        defer { isLoadingRandom = false }
+
+        do {
+            let songs = try await SubsonicClient.shared.getRandomSongs(size: 50)
+            if let first = songs.first {
+                playerViewModel.play(first, queue: songs)
+            }
+        } catch {
+            print("Failed to load random songs: \(error)")
         }
     }
 }
