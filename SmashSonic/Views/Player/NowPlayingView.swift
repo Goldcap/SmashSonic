@@ -26,7 +26,7 @@ struct NowPlayingView: View {
                 Color.black.ignoresSafeArea()
             }
 
-            VStack(spacing: 24) {
+            VStack(spacing: 20) {
                 // Drag handle
                 Capsule()
                     .fill(Color.white.opacity(0.3))
@@ -34,6 +34,7 @@ struct NowPlayingView: View {
                     .padding(.top, 8)
 
                 Spacer()
+                    .frame(maxHeight: 40)
 
                 // Album Art
                 AsyncImage(url: playerViewModel.currentSong?.coverArt.flatMap { SubsonicClient.shared.coverArtURL(for: $0, size: 600) }) { image in
@@ -43,11 +44,9 @@ struct NowPlayingView: View {
                 } placeholder: {
                     PlaceholderArtView()
                 }
-                .frame(width: 300, height: 300)
+                .frame(width: 280, height: 280)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .shadow(radius: 20)
-
-                Spacer()
 
                 // Track Info
                 VStack(spacing: 8) {
@@ -155,9 +154,9 @@ struct NowPlayingView: View {
                     }
                 }
                 .foregroundStyle(.white.opacity(0.7))
-                .padding(.top, 8)
 
                 Spacer()
+                    .frame(maxHeight: 60)
             }
             .padding()
         }

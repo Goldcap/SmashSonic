@@ -7,6 +7,7 @@ struct LikedSongsView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \LikedSong.likedAt, order: .reverse) private var likedSongs: [LikedSong]
+    @State private var isSyncing = false
 
     var body: some View {
         NavigationStack {
@@ -14,51 +15,73 @@ struct LikedSongsView: View {
                 backgroundView
                     .ignoresSafeArea()
 
-                Group {
-                    if likedSongs.isEmpty {
-                        ContentUnavailableView(
-                            "No Liked Songs",
-                            systemImage: "heart",
-                            description: Text("Songs you like will appear here")
-                        )
-                    } else {
-                        List {
-                            Section {
-                                ForEach(likedSongs) { likedSong in
-                                    LikedSongRow(
-                                        likedSong: likedSong,
-                                        isPlaying: playerViewModel.currentSong?.id == likedSong.id
-                                    )
-                                    .listRowBackground(Color.black.opacity(0.5))
-                                    .onTapGesture {
-                                        let songs = likedSongs.map { $0.toSong() }
-                                        playerViewModel.play(likedSong.toSong(), queue: songs)
-                                    }
-                                }
-                                .onDelete { indexSet in
-                                    for index in indexSet {
-                                        let song = likedSongs[index]
-                                        viewModel.unlike(song.id, context: modelContext)
-                                    }
-                                }
-                            } header: {
-                                HStack {
-                                    Text("\(likedSongs.count) songs")
-                                    Spacer()
+                if likedSongs.isEmpty {
+                    VStack {
+                        Spacer()
+                            .frame(height: 100)
+                        Image(systemName: "heart")
+                            .font(.system(size: 50))
+                            .foregroundStyle(.secondary)
+                        Text("No Liked Songs")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                            .padding(.top, 8)
+                        Text("Songs you like will appear here.\nPull down to sync from server.")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                            .multilineTextAlignment(.center)
+                            .padding(.top, 2)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
+                } else {
+                    List {
+                        Section {
+                            ForEach(likedSongs) { likedSong in
+                                LikedSongRow(
+                                    likedSong: likedSong,
+                                    isPlaying: playerViewModel.currentSong?.id == likedSong.id
+                                )
+                                .listRowBackground(Color.black.opacity(0.5))
+                                .onTapGesture {
+                                    let songs = likedSongs.map { $0.toSong() }
+                                    playerViewModel.play(likedSong.toSong(), queue: songs)
                                 }
                             }
+                            .onDelete { indexSet in
+                                for index in indexSet {
+                                    let song = likedSongs[index]
+                                    viewModel.unlike(song.id, context: modelContext)
+                                }
+                            }
+                        } header: {
+                            HStack {
+                                Text("\(likedSongs.count) songs")
+                                Spacer()
+                            }
                         }
-                        .listStyle(.insetGrouped)
-                        .scrollContentBackground(.hidden)
                     }
+                    .listStyle(.insetGrouped)
+                    .scrollContentBackground(.hidden)
                 }
             }
             .navigationTitle("Liked Songs")
             .toolbarBackground(.hidden, for: .navigationBar)
+            .refreshable {
+                await syncFromServer()
+            }
             .toolbar {
-                if !likedSongs.isEmpty {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Menu {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Menu {
+                        Button {
+                            Task { await syncFromServer() }
+                        } label: {
+                            Label("Sync from Server", systemImage: "arrow.triangle.2.circlepath")
+                        }
+
+                        if !likedSongs.isEmpty {
+                            Divider()
+
                             Button {
                                 let songs = likedSongs.map { $0.toSong() }
                                 if let first = songs.first {
@@ -76,9 +99,9 @@ struct LikedSongsView: View {
                             } label: {
                                 Label("Shuffle All", systemImage: "shuffle")
                             }
-                        } label: {
-                            Image(systemName: "ellipsis.circle")
                         }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
@@ -86,6 +109,29 @@ struct LikedSongsView: View {
         .onAppear {
             LikesManager.shared.setModelContext(modelContext)
             viewModel.loadLikedSongs(context: modelContext)
+        }
+    }
+
+    private func syncFromServer() async {
+        isSyncing = true
+        defer { isSyncing = false }
+
+        do {
+            let starredSongs = try await SubsonicClient.shared.getStarred()
+            let existingIds = Set(likedSongs.map { $0.id })
+
+            for song in starredSongs {
+                if !existingIds.contains(song.id) {
+                    let likedSong = LikedSong(from: song)
+                    modelContext.insert(likedSong)
+                }
+            }
+
+            try? modelContext.save()
+            LikesManager.shared.loadLikedSongs()
+            viewModel.loadLikedSongs(context: modelContext)
+        } catch {
+            print("Failed to sync starred songs: \(error)")
         }
     }
 
