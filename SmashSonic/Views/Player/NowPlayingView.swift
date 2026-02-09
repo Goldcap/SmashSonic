@@ -81,16 +81,31 @@ struct NowPlayingView: View {
 
                 // Progress Bar
                 VStack(spacing: 8) {
-                    Slider(value: Binding(
-                        get: { playerViewModel.progress },
-                        set: { playerViewModel.seek(to: $0 * playerViewModel.duration) }
-                    ))
-                    .tint(.white)
+                    GeometryReader { geometry in
+                        ZStack(alignment: .leading) {
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.white.opacity(0.2))
+                                .frame(height: 8)
+
+                            RoundedRectangle(cornerRadius: 4)
+                                .fill(Color.white)
+                                .frame(width: geometry.size.width * playerViewModel.progress, height: 8)
+                        }
+                        .contentShape(Rectangle())
+                        .gesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { value in
+                                    let progress = min(max(value.location.x / geometry.size.width, 0), 1)
+                                    playerViewModel.seek(to: progress * playerViewModel.duration)
+                                }
+                        )
+                    }
+                    .frame(height: 8)
 
                     HStack {
                         Text(playerViewModel.currentTimeFormatted)
                         Spacer()
-                        Text("-\(playerViewModel.remainingTimeFormatted)")
+                        Text(playerViewModel.durationFormatted)
                     }
                     .font(.caption)
                     .foregroundStyle(.white.opacity(0.5))
