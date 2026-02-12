@@ -6,11 +6,11 @@ struct MiniPlayerView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Progress bar with time display
-            HStack(spacing: 6) {
+            HStack(spacing: 8) {
                 Text(playerViewModel.currentTimeFormatted)
                     .font(.caption2)
+                    .monospacedDigit()
                     .foregroundStyle(.secondary)
-                    .frame(width: 36)
 
                 ProgressView(value: playerViewModel.progress)
                     .progressViewStyle(.linear)
@@ -18,11 +18,11 @@ struct MiniPlayerView: View {
 
                 Text(playerViewModel.durationFormatted)
                     .font(.caption2)
+                    .monospacedDigit()
                     .foregroundStyle(.secondary)
-                    .frame(width: 36)
             }
-            .padding(.horizontal, 8)
-            .padding(.top, 4)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
 
             HStack(spacing: 12) {
                 // Album Art
