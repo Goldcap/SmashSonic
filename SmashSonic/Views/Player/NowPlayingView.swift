@@ -83,20 +83,20 @@ struct NowPlayingView: View {
                 }
 
                 // Progress Bar
-                VStack(spacing: 8) {
-                    HStack {
-                        ProgressView(value: playerViewModel.progress)
-                            .progressViewStyle(.linear)
-                            .tint(.cyan)
-                    }
+                HStack(spacing: 12) {
+                    Text(playerViewModel.currentTimeFormatted)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .frame(width: 40)
 
-                    HStack {
-                        Text(playerViewModel.currentTimeFormatted)
-                        Spacer()
-                        Text(playerViewModel.durationFormatted)
-                    }
-                    .font(.caption)
-                    .foregroundStyle(.white.opacity(0.7))
+                    ProgressView(value: playerViewModel.progress)
+                        .progressViewStyle(.linear)
+                        .tint(.cyan)
+
+                    Text(playerViewModel.durationFormatted)
+                        .font(.caption)
+                        .foregroundStyle(.white.opacity(0.7))
+                        .frame(width: 40)
                 }
                 .padding(.horizontal, 24)
 
