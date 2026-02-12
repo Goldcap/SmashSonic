@@ -85,35 +85,24 @@ struct NowPlayingView: View {
                 // Progress Bar
                 VStack(spacing: 8) {
                     GeometryReader { geometry in
-                        let width = geometry.size.width
-                        ZStack(alignment: .leading) {
-                            // Background track
-                            Capsule()
-                                .fill(Color.gray)
-
-                            // Progress track
-                            Capsule()
-                                .fill(Color.cyan)
-                                .frame(width: max(width * playerViewModel.progress, 0))
-                        }
-                        .frame(height: 10)
-                        .contentShape(Rectangle())
-                        .gesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { value in
-                                    let progress = min(max(value.location.x / width, 0), 1)
-                                    playerViewModel.seek(to: progress * playerViewModel.duration)
-                                }
-                        )
+                        ProgressView(value: playerViewModel.progress)
+                            .progressViewStyle(.linear)
+                            .tint(.white)
+                            .frame(height: 10)
+                            .scaleEffect(y: 2.5, anchor: .center)
+                            .contentShape(Rectangle())
+                            .gesture(
+                                DragGesture(minimumDistance: 0)
+                                    .onChanged { value in
+                                        let progress = min(max(value.location.x / geometry.size.width, 0), 1)
+                                        playerViewModel.seek(to: progress * playerViewModel.duration)
+                                    }
+                            )
                     }
                     .frame(height: 10)
 
                     HStack {
                         Text(playerViewModel.currentTimeFormatted)
-                        Spacer()
-                        // DEBUG: Show actual progress value
-                        Text(String(format: "%.2f", playerViewModel.progress))
-                            .foregroundStyle(.yellow)
                         Spacer()
                         Text(playerViewModel.durationFormatted)
                     }
