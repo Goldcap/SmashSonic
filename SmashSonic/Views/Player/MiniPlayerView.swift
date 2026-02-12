@@ -5,17 +5,24 @@ struct MiniPlayerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Progress bar
-            HStack(spacing: 4) {
+            // Progress bar with time display
+            HStack(spacing: 6) {
+                Text(playerViewModel.currentTimeFormatted)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 36)
+
                 ProgressView(value: playerViewModel.progress)
                     .progressViewStyle(.linear)
                     .tint(.cyan)
-                Text(String(format: "%.0f%%", playerViewModel.progress * 100))
+
+                Text(playerViewModel.durationFormatted)
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                    .frame(width: 32)
+                    .frame(width: 36)
             }
-            .frame(height: 4)
+            .padding(.horizontal, 8)
+            .padding(.top, 4)
 
             HStack(spacing: 12) {
                 // Album Art
