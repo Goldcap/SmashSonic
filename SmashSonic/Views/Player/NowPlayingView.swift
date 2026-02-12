@@ -150,7 +150,21 @@ struct NowPlayingView: View {
                 .foregroundStyle(.white)
 
                 // Secondary Controls
-                HStack(spacing: 40) {
+                HStack(spacing: 24) {
+                    // Play Mode Button
+                    Button {
+                        playerViewModel.cyclePlayMode()
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: playerViewModel.playMode.icon)
+                                .font(.system(size: 20))
+                            Text(playerViewModel.playMode.rawValue)
+                                .font(.system(size: 9))
+                        }
+                        .frame(width: 50)
+                    }
+                    .foregroundStyle(playerViewModel.playMode == .playOnce ? .white.opacity(0.7) : .white)
+
                     Button {
                         playerViewModel.skipBackward()
                     } label: {
@@ -176,6 +190,19 @@ struct NowPlayingView: View {
                     } label: {
                         Image(systemName: "goforward.15")
                             .font(.system(size: 22))
+                    }
+
+                    // Rewind to Beginning Button
+                    Button {
+                        playerViewModel.rewindToBeginning()
+                    } label: {
+                        VStack(spacing: 2) {
+                            Image(systemName: "backward.end.fill")
+                                .font(.system(size: 20))
+                            Text("Rewind")
+                                .font(.system(size: 9))
+                        }
+                        .frame(width: 50)
                     }
                 }
                 .foregroundStyle(.white.opacity(0.7))

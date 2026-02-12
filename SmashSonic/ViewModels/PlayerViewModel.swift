@@ -13,6 +13,7 @@ final class PlayerViewModel: ObservableObject {
     @Published var showFullPlayer = false
     @Published var showQueue = false
     @Published var autoAddRandomSongs = false
+    @Published var playMode: PlayMode = .playOnce
 
     private var cancellables = Set<AnyCancellable>()
     private let audioPlayer = AudioPlayer.shared
@@ -49,6 +50,10 @@ final class PlayerViewModel: ObservableObject {
         audioPlayer.$autoAddRandomSongs
             .receive(on: DispatchQueue.main)
             .assign(to: &$autoAddRandomSongs)
+
+        audioPlayer.$playMode
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$playMode)
     }
 
     func play(_ song: Song, queue: [Song]? = nil) {
@@ -77,6 +82,14 @@ final class PlayerViewModel: ObservableObject {
 
     func skipBackward() {
         audioPlayer.skipBackward()
+    }
+
+    func rewindToBeginning() {
+        audioPlayer.rewindToBeginning()
+    }
+
+    func cyclePlayMode() {
+        audioPlayer.cyclePlayMode()
     }
 
     var progress: Double {

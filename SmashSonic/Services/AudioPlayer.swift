@@ -3,6 +3,28 @@ import AVFoundation
 import MediaPlayer
 import Combine
 
+enum PlayMode: String, CaseIterable {
+    case playOnce = "Play Once"
+    case loop = "Loop"
+    case shuffle = "Shuffle"
+
+    var icon: String {
+        switch self {
+        case .playOnce: return "arrow.right"
+        case .loop: return "repeat"
+        case .shuffle: return "shuffle"
+        }
+    }
+
+    func next() -> PlayMode {
+        switch self {
+        case .playOnce: return .loop
+        case .loop: return .shuffle
+        case .shuffle: return .playOnce
+        }
+    }
+}
+
 final class AudioPlayer: ObservableObject {
     static let shared = AudioPlayer()
 
@@ -15,6 +37,7 @@ final class AudioPlayer: ObservableObject {
     @Published var isLoading = false
     @Published var shuffleMode = false
     @Published var autoAddRandomSongs = false
+    @Published var playMode: PlayMode = .playOnce
 
     private var player: AVPlayer?
     private var isLoadingMoreSongs = false
@@ -131,22 +154,50 @@ final class AudioPlayer: ObservableObject {
     }
 
     private func handlePlaybackEnded() {
-        if currentIndex < queue.count - 1 {
-            next()
-            checkAndReplenishQueue()
-        } else if autoAddRandomSongs {
-            // Try to add more songs and continue
-            Task {
-                await addRandomSongsToQueue()
-                if currentIndex < queue.count - 1 {
+        switch playMode {
+        case .loop:
+            // Loop the current song
+            seek(to: 0)
+            play()
+
+        case .shuffle:
+            // Pick a random song from the queue or fetch a new one
+            if queue.count > 1 {
+                var randomIndex: Int
+                repeat {
+                    randomIndex = Int.random(in: 0..<queue.count)
+                } while randomIndex == currentIndex && queue.count > 1
+                playFromQueue(at: randomIndex)
+            } else {
+                // Fetch a new random song
+                Task {
+                    await addRandomSongsToQueue(count: 1)
                     await MainActor.run {
-                        next()
+                        if currentIndex < queue.count - 1 {
+                            next()
+                        }
                     }
                 }
             }
-        } else {
-            isPlaying = false
-            currentTime = 0
+
+        case .playOnce:
+            // Default behavior: play through queue then stop
+            if currentIndex < queue.count - 1 {
+                next()
+                checkAndReplenishQueue()
+            } else if autoAddRandomSongs {
+                Task {
+                    await addRandomSongsToQueue()
+                    if currentIndex < queue.count - 1 {
+                        await MainActor.run {
+                            next()
+                        }
+                    }
+                }
+            } else {
+                isPlaying = false
+                currentTime = 0
+            }
         }
     }
 
@@ -312,6 +363,14 @@ final class AudioPlayer: ObservableObject {
         player?.seek(to: CMTime(seconds: time, preferredTimescale: 600))
         currentTime = time
         updateNowPlayingProgress()
+    }
+
+    func rewindToBeginning() {
+        seek(to: 0)
+    }
+
+    func cyclePlayMode() {
+        playMode = playMode.next()
     }
 
     func skipForward(_ seconds: TimeInterval = 15) {
