@@ -82,21 +82,21 @@ struct NowPlayingView: View {
                         .frame(width: 32, height: 32)
                 }
 
-                // Progress Bar
+                // Progress Bar - TEST with hardcoded 0.5
                 VStack(spacing: 8) {
                     GeometryReader { geometry in
                         let width = geometry.size.width
                         ZStack(alignment: .leading) {
                             // Background track
                             Capsule()
-                                .fill(Color.white.opacity(0.3))
+                                .fill(Color.gray)
 
-                            // Progress track
+                            // Progress track - TEST hardcoded to 50%
                             Capsule()
-                                .fill(Color.white)
-                                .frame(width: max(width * playerViewModel.progress, 0))
+                                .fill(Color.cyan)
+                                .frame(width: max(width * 0.5, 0))
                         }
-                        .frame(height: 8)
+                        .frame(height: 10)
                         .contentShape(Rectangle())
                         .gesture(
                             DragGesture(minimumDistance: 0)
@@ -106,7 +106,7 @@ struct NowPlayingView: View {
                                 }
                         )
                     }
-                    .frame(height: 8)
+                    .frame(height: 10)
 
                     HStack {
                         Text(playerViewModel.currentTimeFormatted)
