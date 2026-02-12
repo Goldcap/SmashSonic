@@ -87,8 +87,8 @@ struct NowPlayingView: View {
                     GeometryReader { geometry in
                         ZStack(alignment: .leading) {
                             RoundedRectangle(cornerRadius: 4)
-                                .fill(Color.white.opacity(0.2))
-                                .frame(height: 8)
+                                .fill(Color.white.opacity(0.3))
+                                .frame(width: geometry.size.width, height: 8)
 
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color.white)

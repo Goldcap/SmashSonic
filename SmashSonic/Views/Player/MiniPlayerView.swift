@@ -7,12 +7,17 @@ struct MiniPlayerView: View {
         VStack(spacing: 0) {
             // Progress bar
             GeometryReader { geometry in
-                Rectangle()
-                    .fill(Color.accentColor)
-                    .frame(width: geometry.size.width * playerViewModel.progress)
+                ZStack(alignment: .leading) {
+                    Rectangle()
+                        .fill(Color.secondary.opacity(0.3))
+                        .frame(height: 3)
+
+                    Rectangle()
+                        .fill(Color.accentColor)
+                        .frame(width: geometry.size.width * playerViewModel.progress, height: 3)
+                }
             }
-            .frame(height: 2)
-            .background(Color.secondary.opacity(0.2))
+            .frame(height: 3)
 
             HStack(spacing: 12) {
                 // Album Art
