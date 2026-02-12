@@ -84,24 +84,23 @@ struct NowPlayingView: View {
 
                 // Progress Bar
                 HStack(spacing: 12) {
-                    Text(playerViewModel.currentTimeFormatted)
-                        .font(.subheadline)
-                        .monospacedDigit()
-                        .foregroundStyle(.white)
+                    Text("START")
+                        .font(.title)
+                        .foregroundStyle(.yellow)
 
-                    ProgressView(value: playerViewModel.progress)
+                    ProgressView(value: 0.5)
                         .progressViewStyle(.linear)
-                        .tint(.cyan)
-                        .frame(height: 6)
+                        .tint(.yellow)
+                        .frame(height: 10)
 
-                    Text(playerViewModel.durationFormatted)
-                        .font(.subheadline)
-                        .monospacedDigit()
-                        .foregroundStyle(.white)
+                    Text("END")
+                        .font(.title)
+                        .foregroundStyle(.yellow)
                 }
+                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 48)
-                .padding(.vertical, 8)
-                .background(Color.red.opacity(0.3))
+                .padding(.vertical, 12)
+                .background(Color.blue)
 
                 // Playback Controls
                 HStack(spacing: 40) {
