@@ -114,6 +114,7 @@ struct CustomTabBar: View {
                     }
                 } label: {
                     let isActionTab = tabs[index].action != .none
+                    let isSelected = selectedTab == index && !isActionTab
                     VStack(spacing: 4) {
                         if UIImage(named: tabs[index].icon) != nil {
                             Image(tabs[index].icon)
@@ -122,22 +123,29 @@ struct CustomTabBar: View {
                                 .interpolation(.none)
                                 .scaledToFit()
                                 .frame(width: 36, height: 36)
-                                .opacity(isActionTab ? 1.0 : (selectedTab == index ? 1.0 : 0.5))
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(Color.white, lineWidth: isSelected ? 2 : 0)
+                                )
                         } else if let systemIcon = tabs[index].systemIcon {
                             Image(systemName: systemIcon)
                                 .font(.system(size: 24))
                                 .frame(width: 36, height: 36)
-                                .foregroundStyle(isActionTab ? Color.accentColor : (selectedTab == index ? .red : .secondary))
+                                .foregroundStyle(isActionTab ? Color.accentColor : .primary)
+                                .overlay(
+                                    RoundedRectangle(cornerRadius: 4)
+                                        .stroke(Color.white, lineWidth: isSelected ? 2 : 0)
+                                )
                         } else {
                             Image(systemName: "questionmark.circle")
                                 .font(.system(size: 24))
                                 .frame(width: 36, height: 36)
-                                .foregroundStyle(selectedTab == index ? .primary : .secondary)
+                                .foregroundStyle(.primary)
                         }
 
                         Text(tabs[index].label)
                             .font(.system(size: 10))
-                            .foregroundColor(isActionTab ? .accentColor : (selectedTab == index ? .primary : .secondary))
+                            .foregroundColor(isActionTab ? .accentColor : .primary)
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 8)
