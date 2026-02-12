@@ -83,7 +83,7 @@ struct NowPlayingView: View {
                 }
 
                 // Progress Bar
-                HStack(spacing: 12) {
+                HStack(spacing: 8) {
                     Text(playerViewModel.currentTimeFormatted)
                         .font(.caption)
                         .foregroundStyle(.white.opacity(0.7))
@@ -98,7 +98,7 @@ struct NowPlayingView: View {
                         .foregroundStyle(.white.opacity(0.7))
                         .frame(width: 40)
                 }
-                .padding(.horizontal, 24)
+                .padding(.horizontal, 40)
 
                 // Playback Controls
                 HStack(spacing: 40) {
