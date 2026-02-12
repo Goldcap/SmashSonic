@@ -85,20 +85,23 @@ struct NowPlayingView: View {
                 // Progress Bar
                 VStack(spacing: 8) {
                     GeometryReader { geometry in
+                        let width = geometry.size.width
                         ZStack(alignment: .leading) {
-                            RoundedRectangle(cornerRadius: 4)
+                            // Background track
+                            Capsule()
                                 .fill(Color.white.opacity(0.3))
-                                .frame(width: geometry.size.width, height: 8)
 
-                            RoundedRectangle(cornerRadius: 4)
+                            // Progress track
+                            Capsule()
                                 .fill(Color.white)
-                                .frame(width: geometry.size.width * playerViewModel.progress, height: 8)
+                                .frame(width: max(width * playerViewModel.progress, 0))
                         }
+                        .frame(height: 8)
                         .contentShape(Rectangle())
                         .gesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { value in
-                                    let progress = min(max(value.location.x / geometry.size.width, 0), 1)
+                                    let progress = min(max(value.location.x / width, 0), 1)
                                     playerViewModel.seek(to: progress * playerViewModel.duration)
                                 }
                         )
