@@ -321,9 +321,12 @@ struct HomeView: View {
                             if !likedSongs.isEmpty {
                                 NavigationLink(destination: LikedSongsView(viewModel: likesViewModel)) {
                                     HStack(spacing: 12) {
-                                        Image(systemName: "heart.fill")
-                                            .foregroundStyle(.red)
-                                            .font(.title2)
+                                        Image("PixelHeart")
+                                            .renderingMode(.original)
+                                            .resizable()
+                                            .interpolation(.none)
+                                            .scaledToFit()
+                                            .frame(width: 32, height: 32)
                                         VStack(alignment: .leading) {
                                             Text("Liked Songs")
                                                 .font(.headline)

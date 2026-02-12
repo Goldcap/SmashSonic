@@ -246,8 +246,15 @@ struct SongRow: View {
                 Button {
                     likesViewModel.toggleLike(song, context: modelContext)
                 } label: {
-                    Label(likesViewModel.isLiked(song.id) ? "Unlike" : "Like",
-                          systemImage: likesViewModel.isLiked(song.id) ? "heart.fill" : "heart")
+                    HStack {
+                        Image(likesViewModel.isLiked(song.id) ? "PixelHeart" : "PixelHeartEmpty")
+                            .renderingMode(.original)
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFit()
+                            .frame(width: 20, height: 20)
+                        Text(likesViewModel.isLiked(song.id) ? "Unlike" : "Like")
+                    }
                 }
 
                 if downloadsViewModel.isDownloaded(song.id) {

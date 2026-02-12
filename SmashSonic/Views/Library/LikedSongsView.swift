@@ -20,9 +20,12 @@ struct LikedSongsView: View {
                     VStack {
                         Spacer()
                             .frame(height: 100)
-                        Image(systemName: "heart")
-                            .font(.system(size: 50))
-                            .foregroundStyle(.secondary)
+                        Image("PixelHeartEmpty")
+                            .renderingMode(.original)
+                            .resizable()
+                            .interpolation(.none)
+                            .scaledToFit()
+                            .frame(width: 64, height: 64)
                         Text("No Liked Songs")
                             .font(.title2)
                             .fontWeight(.semibold)
@@ -209,8 +212,12 @@ struct LikedSongRow: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
 
-            Image(systemName: "heart.fill")
-                .foregroundStyle(.red)
+            Image("PixelHeart")
+                .renderingMode(.original)
+                .resizable()
+                .interpolation(.none)
+                .scaledToFit()
+                .frame(width: 24, height: 24)
         }
         .contentShape(Rectangle())
     }

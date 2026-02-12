@@ -74,9 +74,12 @@ struct NowPlayingView: View {
                         likesViewModel.toggleLike(song, context: modelContext)
                     }
                 } label: {
-                    Image(systemName: likesViewModel.isLiked(playerViewModel.currentSong?.id ?? "") ? "heart.fill" : "heart")
-                        .font(.title2)
-                        .foregroundStyle(likesViewModel.isLiked(playerViewModel.currentSong?.id ?? "") ? .red : .white)
+                    Image(likesViewModel.isLiked(playerViewModel.currentSong?.id ?? "") ? "PixelHeart" : "PixelHeartEmpty")
+                        .renderingMode(.original)
+                        .resizable()
+                        .interpolation(.none)
+                        .scaledToFit()
+                        .frame(width: 32, height: 32)
                 }
 
                 // Progress Bar
