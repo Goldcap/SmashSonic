@@ -87,18 +87,21 @@ struct NowPlayingView: View {
                     Text(playerViewModel.currentTimeFormatted)
                         .font(.subheadline)
                         .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.white)
 
                     ProgressView(value: playerViewModel.progress)
                         .progressViewStyle(.linear)
                         .tint(.cyan)
+                        .frame(height: 6)
 
                     Text(playerViewModel.durationFormatted)
                         .font(.subheadline)
                         .monospacedDigit()
-                        .foregroundStyle(.white.opacity(0.8))
+                        .foregroundStyle(.white)
                 }
                 .padding(.horizontal, 48)
+                .padding(.vertical, 8)
+                .background(Color.red.opacity(0.3))
 
                 // Playback Controls
                 HStack(spacing: 40) {

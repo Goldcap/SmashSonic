@@ -10,21 +10,23 @@ struct MiniPlayerView: View {
                 Text(playerViewModel.currentTimeFormatted)
                     .font(.caption2)
                     .monospacedDigit()
-                    .foregroundStyle(.primary)
 
                 ProgressView(value: playerViewModel.progress)
                     .progressViewStyle(.linear)
                     .tint(.cyan)
-                    .frame(height: 8)
+                    .frame(height: 6)
 
                 Text(playerViewModel.durationFormatted)
                     .font(.caption2)
                     .monospacedDigit()
-                    .foregroundStyle(.primary)
+
+                // DEBUG: show raw values
+                Text("d:\(Int(playerViewModel.duration))")
+                    .font(.caption2)
+                    .foregroundStyle(.red)
             }
             .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color.red.opacity(0.3))
+            .padding(.vertical, 6)
 
             HStack(spacing: 12) {
                 // Album Art
