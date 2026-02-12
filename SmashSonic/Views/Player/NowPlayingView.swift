@@ -84,22 +84,19 @@ struct NowPlayingView: View {
 
                 // Progress Bar
                 VStack(spacing: 8) {
-                    ProgressView(value: playerViewModel.progress)
-                        .progressViewStyle(.linear)
-                        .tint(.white)
-                        .frame(height: 8)
-                        .scaleEffect(y: 2, anchor: .center)
+                    HStack {
+                        ProgressView(value: playerViewModel.progress)
+                            .progressViewStyle(.linear)
+                            .tint(.cyan)
+                    }
 
                     HStack {
                         Text(playerViewModel.currentTimeFormatted)
                         Spacer()
-                        Text(String(format: "%.2f", playerViewModel.progress))
-                            .foregroundStyle(.yellow)
-                        Spacer()
                         Text(playerViewModel.durationFormatted)
                     }
                     .font(.caption)
-                    .foregroundStyle(.white.opacity(0.5))
+                    .foregroundStyle(.white.opacity(0.7))
                 }
                 .padding(.horizontal, 24)
 
