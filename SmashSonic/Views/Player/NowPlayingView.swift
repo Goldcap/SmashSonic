@@ -82,7 +82,7 @@ struct NowPlayingView: View {
                         .frame(width: 32, height: 32)
                 }
 
-                // Progress Bar - TEST with hardcoded 0.5
+                // Progress Bar
                 VStack(spacing: 8) {
                     GeometryReader { geometry in
                         let width = geometry.size.width
@@ -91,10 +91,10 @@ struct NowPlayingView: View {
                             Capsule()
                                 .fill(Color.gray)
 
-                            // Progress track - TEST hardcoded to 50%
+                            // Progress track
                             Capsule()
                                 .fill(Color.cyan)
-                                .frame(width: max(width * 0.5, 0))
+                                .frame(width: max(width * playerViewModel.progress, 0))
                         }
                         .frame(height: 10)
                         .contentShape(Rectangle())
@@ -110,6 +110,10 @@ struct NowPlayingView: View {
 
                     HStack {
                         Text(playerViewModel.currentTimeFormatted)
+                        Spacer()
+                        // DEBUG: Show actual progress value
+                        Text(String(format: "%.2f", playerViewModel.progress))
+                            .foregroundStyle(.yellow)
                         Spacer()
                         Text(playerViewModel.durationFormatted)
                     }

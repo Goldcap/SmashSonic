@@ -5,8 +5,8 @@ struct MiniPlayerView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            // Progress bar - TEST with 0.5 to verify visibility
-            ProgressView(value: 0.5)
+            // Progress bar
+            ProgressView(value: playerViewModel.progress)
                 .progressViewStyle(.linear)
                 .tint(.cyan)
                 .frame(height: 4)
