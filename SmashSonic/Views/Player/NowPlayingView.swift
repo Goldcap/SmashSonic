@@ -84,25 +84,17 @@ struct NowPlayingView: View {
 
                 // Progress Bar
                 VStack(spacing: 8) {
-                    GeometryReader { geometry in
-                        ProgressView(value: playerViewModel.progress)
-                            .progressViewStyle(.linear)
-                            .tint(.white)
-                            .frame(height: 10)
-                            .scaleEffect(y: 2.5, anchor: .center)
-                            .contentShape(Rectangle())
-                            .gesture(
-                                DragGesture(minimumDistance: 0)
-                                    .onChanged { value in
-                                        let progress = min(max(value.location.x / geometry.size.width, 0), 1)
-                                        playerViewModel.seek(to: progress * playerViewModel.duration)
-                                    }
-                            )
-                    }
-                    .frame(height: 10)
+                    ProgressView(value: playerViewModel.progress)
+                        .progressViewStyle(.linear)
+                        .tint(.white)
+                        .frame(height: 8)
+                        .scaleEffect(y: 2, anchor: .center)
 
                     HStack {
                         Text(playerViewModel.currentTimeFormatted)
+                        Spacer()
+                        Text(String(format: "%.2f", playerViewModel.progress))
+                            .foregroundStyle(.yellow)
                         Spacer()
                         Text(playerViewModel.durationFormatted)
                     }

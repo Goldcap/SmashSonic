@@ -6,11 +6,16 @@ struct MiniPlayerView: View {
     var body: some View {
         VStack(spacing: 0) {
             // Progress bar
-            ProgressView(value: playerViewModel.progress)
-                .progressViewStyle(.linear)
-                .tint(.cyan)
-                .frame(height: 4)
-                .scaleEffect(y: 2, anchor: .center)
+            HStack(spacing: 4) {
+                ProgressView(value: playerViewModel.progress)
+                    .progressViewStyle(.linear)
+                    .tint(.cyan)
+                Text(String(format: "%.0f%%", playerViewModel.progress * 100))
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .frame(width: 32)
+            }
+            .frame(height: 4)
 
             HStack(spacing: 12) {
                 // Album Art
