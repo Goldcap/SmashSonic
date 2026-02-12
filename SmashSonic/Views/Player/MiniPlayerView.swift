@@ -44,12 +44,11 @@ struct MiniPlayerView: View {
                 // Controls
                 HStack(spacing: 16) {
                     Button {
-                        playerViewModel.cyclePlayMode()
+                        playerViewModel.rewindToBeginning()
                     } label: {
-                        Image(systemName: playerViewModel.playMode.icon)
-                            .font(.body)
+                        Image(systemName: "backward.fill")
+                            .font(.title3)
                     }
-                    .foregroundStyle(playerViewModel.playMode == .playOnce ? .secondary : .primary)
 
                     Button {
                         playerViewModel.togglePlayPause()
@@ -70,11 +69,12 @@ struct MiniPlayerView: View {
                     }
 
                     Button {
-                        playerViewModel.rewindToBeginning()
+                        playerViewModel.cyclePlayMode()
                     } label: {
-                        Image(systemName: "backward.end.fill")
+                        Image(systemName: playerViewModel.playMode.icon)
                             .font(.body)
                     }
+                    .foregroundStyle(playerViewModel.playMode == .playOnce ? .secondary : .primary)
                 }
                 .foregroundStyle(.primary)
             }

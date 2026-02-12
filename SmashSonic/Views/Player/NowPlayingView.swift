@@ -197,7 +197,7 @@ struct NowPlayingView: View {
                         playerViewModel.rewindToBeginning()
                     } label: {
                         VStack(spacing: 2) {
-                            Image(systemName: "backward.end.fill")
+                            Image(systemName: "backward.fill")
                                 .font(.system(size: 20))
                             Text("Rewind")
                                 .font(.system(size: 9))
