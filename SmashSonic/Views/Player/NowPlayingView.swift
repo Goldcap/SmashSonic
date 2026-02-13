@@ -82,26 +82,25 @@ struct NowPlayingView: View {
                         .frame(width: 32, height: 32)
                 }
 
-                // Progress Bar
-                HStack(spacing: 12) {
+                // Progress Bar - exact copy of mini player structure
+                HStack(spacing: 8) {
                     Text(playerViewModel.currentTimeFormatted)
-                        .font(.subheadline)
+                        .font(.caption2)
                         .monospacedDigit()
-                        .foregroundStyle(.white)
+                        .foregroundColor(.white)
 
                     ProgressView(value: playerViewModel.progress)
                         .progressViewStyle(.linear)
                         .tint(.cyan)
-                        .frame(height: 6)
+                        .frame(height: 4)
 
                     Text(playerViewModel.durationFormatted)
-                        .font(.subheadline)
+                        .font(.caption2)
                         .monospacedDigit()
-                        .foregroundStyle(.white)
+                        .foregroundColor(.white)
                 }
-                .frame(maxWidth: .infinity)
                 .padding(.horizontal, 48)
-                .padding(.vertical, 8)
+                .padding(.vertical, 6)
 
                 // Playback Controls
                 HStack(spacing: 40) {
