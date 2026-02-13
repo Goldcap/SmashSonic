@@ -83,31 +83,34 @@ struct NowPlayingView: View {
                 }
 
                 // Progress Bar
-                VStack(spacing: 4) {
-                    // DEBUG: Show raw values
-                    Text("DEBUG: \(Int(playerViewModel.currentTime))s / \(Int(playerViewModel.duration))s = \(String(format: "%.2f", playerViewModel.progress))")
+                HStack(spacing: 10) {
+                    Text(playerViewModel.currentTimeFormatted)
                         .font(.caption)
-                        .foregroundColor(.yellow)
+                        .monospacedDigit()
+                        .foregroundColor(.white)
 
-                    HStack(spacing: 8) {
-                        Text(playerViewModel.currentTimeFormatted)
-                            .font(.caption2)
-                            .monospacedDigit()
-                            .foregroundColor(.white)
+                    // Custom progress bar using GeometryReader
+                    GeometryReader { geo in
+                        ZStack(alignment: .leading) {
+                            // Background track
+                            Capsule()
+                                .fill(Color.white.opacity(0.3))
 
-                        ProgressView(value: playerViewModel.progress)
-                            .progressViewStyle(.linear)
-                            .tint(.cyan)
-                            .frame(height: 4)
-
-                        Text(playerViewModel.durationFormatted)
-                            .font(.caption2)
-                            .monospacedDigit()
-                            .foregroundColor(.white)
+                            // Progress fill
+                            Capsule()
+                                .fill(Color.cyan)
+                                .frame(width: geo.size.width * playerViewModel.progress)
+                        }
                     }
+                    .frame(height: 6)
+
+                    Text(playerViewModel.durationFormatted)
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundColor(.white)
                 }
                 .padding(.horizontal, 48)
-                .padding(.vertical, 6)
+                .padding(.vertical, 10)
 
                 // Playback Controls
                 HStack(spacing: 40) {
