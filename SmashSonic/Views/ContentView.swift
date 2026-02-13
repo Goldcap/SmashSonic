@@ -53,9 +53,11 @@ struct ContentView: View {
         }
         .sheet(isPresented: $playerViewModel.showFullPlayer) {
             NowPlayingView()
+                .environmentObject(playerViewModel)
         }
         .sheet(isPresented: $playerViewModel.showQueue) {
             QueueView()
+                .environmentObject(playerViewModel)
         }
         .sheet(isPresented: $showMenu) {
             MenuView(
