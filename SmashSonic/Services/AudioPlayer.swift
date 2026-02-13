@@ -136,7 +136,14 @@ final class AudioPlayer: ObservableObject {
             .sink { [weak self] status in
                 if status == .readyToPlay {
                     self?.isLoading = false
-                    self?.duration = playerItem.duration.seconds.isFinite ? playerItem.duration.seconds : 0
+                    // Try to get duration from player, fallback to song metadata
+                    if playerItem.duration.seconds.isFinite && playerItem.duration.seconds > 0 {
+                        self?.duration = playerItem.duration.seconds
+                    } else if let songDuration = self?.currentSong?.duration {
+                        self?.duration = Double(songDuration)
+                    } else {
+                        self?.duration = 0
+                    }
                     self?.player?.play()
                     self?.isPlaying = true
                     self?.updateNowPlayingInfo()

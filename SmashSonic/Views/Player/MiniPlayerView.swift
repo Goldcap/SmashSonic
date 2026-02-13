@@ -10,20 +10,17 @@ struct MiniPlayerView: View {
                 Text(playerViewModel.currentTimeFormatted)
                     .font(.caption2)
                     .monospacedDigit()
+                    .foregroundStyle(.secondary)
 
                 ProgressView(value: playerViewModel.progress)
                     .progressViewStyle(.linear)
                     .tint(.cyan)
-                    .frame(height: 6)
+                    .frame(height: 4)
 
                 Text(playerViewModel.durationFormatted)
                     .font(.caption2)
                     .monospacedDigit()
-
-                // DEBUG: show raw values
-                Text("d:\(Int(playerViewModel.duration))")
-                    .font(.caption2)
-                    .foregroundStyle(.red)
+                    .foregroundStyle(.secondary)
             }
             .padding(.horizontal, 12)
             .padding(.vertical, 6)
