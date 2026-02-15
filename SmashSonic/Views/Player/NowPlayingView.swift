@@ -4,9 +4,7 @@ import SwiftData
 struct NowPlayingView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject private var likesViewModel = LikesViewModel()
-    @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
-    @State private var dragOffset: CGFloat = 0
 
     var body: some View {
         ZStack {
@@ -210,22 +208,7 @@ struct NowPlayingView: View {
             }
             .padding()
         }
-        .gesture(
-            DragGesture()
-                .onChanged { value in
-                    if value.translation.height > 0 {
-                        dragOffset = value.translation.height
-                    }
-                }
-                .onEnded { value in
-                    if value.translation.height > 100 {
-                        dismiss()
-                    }
-                    dragOffset = 0
-                }
-        )
-        .offset(y: dragOffset)
-        .animation(.interactiveSpring(), value: dragOffset)
+        .presentationDragIndicator(.hidden)
     }
 }
 
