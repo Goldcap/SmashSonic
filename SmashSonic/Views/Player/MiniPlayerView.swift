@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MiniPlayerView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
+    @State private var coverArtURL: URL?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -27,7 +28,7 @@ struct MiniPlayerView: View {
 
             HStack(spacing: 12) {
                 // Album Art
-                AsyncImage(url: playerViewModel.currentSong?.coverArt.flatMap { SubsonicClient.shared.coverArtURL(for: $0, size: 100) }) { image in
+                AsyncImage(url: coverArtURL) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -98,6 +99,16 @@ struct MiniPlayerView: View {
                 .frame(height: 2)
         }
         .background(.ultraThinMaterial)
+        .onAppear {
+            coverArtURL = playerViewModel.currentSong?.coverArt.flatMap {
+                SubsonicClient.shared.coverArtURL(for: $0, size: 100)
+            }
+        }
+        .onChange(of: playerViewModel.currentSong?.id) {
+            coverArtURL = playerViewModel.currentSong?.coverArt.flatMap {
+                SubsonicClient.shared.coverArtURL(for: $0, size: 100)
+            }
+        }
         .onTapGesture {
             playerViewModel.showFullPlayer = true
         }

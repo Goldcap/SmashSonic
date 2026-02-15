@@ -5,12 +5,13 @@ struct NowPlayingView: View {
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @StateObject private var likesViewModel = LikesViewModel()
     @Environment(\.modelContext) private var modelContext
+    @State private var coverArtURL: URL?
 
     var body: some View {
         ZStack {
             // Background blur
-            if let coverArt = playerViewModel.currentSong?.coverArt {
-                AsyncImage(url: SubsonicClient.shared.coverArtURL(for: coverArt, size: 600)) { image in
+            if coverArtURL != nil {
+                AsyncImage(url: coverArtURL) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -32,7 +33,7 @@ struct NowPlayingView: View {
                     .padding(.top, 8)
 
                 // Album Art
-                AsyncImage(url: playerViewModel.currentSong?.coverArt.flatMap { SubsonicClient.shared.coverArtURL(for: $0, size: 600) }) { image in
+                AsyncImage(url: coverArtURL) { image in
                     image
                         .resizable()
                         .aspectRatio(contentMode: .fill)
@@ -207,6 +208,16 @@ struct NowPlayingView: View {
                 Spacer()
             }
             .padding()
+        }
+        .onAppear {
+            coverArtURL = playerViewModel.currentSong?.coverArt.flatMap {
+                SubsonicClient.shared.coverArtURL(for: $0, size: 600)
+            }
+        }
+        .onChange(of: playerViewModel.currentSong?.id) {
+            coverArtURL = playerViewModel.currentSong?.coverArt.flatMap {
+                SubsonicClient.shared.coverArtURL(for: $0, size: 600)
+            }
         }
         .presentationDragIndicator(.hidden)
     }
