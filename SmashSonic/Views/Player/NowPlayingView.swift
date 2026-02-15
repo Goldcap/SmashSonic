@@ -8,8 +8,181 @@ struct NowPlayingView: View {
     @State private var coverArtURL: URL?
 
     var body: some View {
-        ZStack {
-            // Background blur
+        VStack(spacing: 16) {
+            // Drag handle
+            Capsule()
+                .fill(Color.white.opacity(0.3))
+                .frame(width: 40, height: 5)
+                .padding(.top, 8)
+
+            // Album Art
+            AsyncImage(url: coverArtURL) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                PlaceholderArtView()
+            }
+            .frame(width: 280, height: 280)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .shadow(radius: 20)
+
+            // Track Info
+            VStack(spacing: 4) {
+                Text(playerViewModel.currentSong?.title ?? "Not Playing")
+                    .font(.title2)
+                    .fontWeight(.bold)
+                    .foregroundStyle(.white)
+                    .lineLimit(1)
+
+                Text(playerViewModel.currentSong?.artist ?? "Unknown Artist")
+                    .font(.title3)
+                    .foregroundStyle(.white.opacity(0.7))
+                    .lineLimit(1)
+
+                if let album = playerViewModel.currentSong?.album {
+                    Text(album)
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.5))
+                        .lineLimit(1)
+                }
+            }
+            .padding(.horizontal)
+
+            // Like Button
+            Button {
+                if let song = playerViewModel.currentSong {
+                    likesViewModel.toggleLike(song, context: modelContext)
+                }
+            } label: {
+                Image(likesViewModel.isLiked(playerViewModel.currentSong?.id ?? "") ? "PixelHeart" : "PixelHeartEmpty")
+                    .renderingMode(.original)
+                    .resizable()
+                    .interpolation(.none)
+                    .scaledToFit()
+                    .frame(width: 32, height: 32)
+            }
+
+            // Progress Bar
+            HStack(spacing: 10) {
+                Text(playerViewModel.currentTimeFormatted)
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundColor(.white)
+
+                ProgressView(value: playerViewModel.progress)
+                    .progressViewStyle(.linear)
+                    .tint(.cyan)
+                    .frame(height: 6)
+
+                Text(playerViewModel.durationFormatted)
+                    .font(.caption)
+                    .monospacedDigit()
+                    .foregroundColor(.white)
+            }
+            .padding(.horizontal, 24)
+            .padding(.vertical, 10)
+
+            // Playback Controls
+            HStack(spacing: 40) {
+                Button {
+                    playerViewModel.previous()
+                } label: {
+                    Image(systemName: "backward.fill")
+                        .font(.system(size: 32))
+                }
+
+                Button {
+                    playerViewModel.togglePlayPause()
+                } label: {
+                    ZStack {
+                        Circle()
+                            .fill(Color.white)
+                            .frame(width: 70, height: 70)
+
+                        if playerViewModel.isLoading {
+                            ProgressView()
+                                .tint(.black)
+                        } else {
+                            Image(systemName: playerViewModel.isPlaying ? "pause.fill" : "play.fill")
+                                .font(.system(size: 30))
+                                .foregroundStyle(.black)
+                        }
+                    }
+                }
+
+                Button {
+                    playerViewModel.next()
+                } label: {
+                    Image(systemName: "forward.fill")
+                        .font(.system(size: 32))
+                }
+            }
+            .foregroundStyle(.white)
+
+            // Secondary Controls
+            HStack(spacing: 24) {
+                // Play Mode Button
+                Button {
+                    playerViewModel.cyclePlayMode()
+                } label: {
+                    VStack(spacing: 2) {
+                        Image(systemName: playerViewModel.playMode.icon)
+                            .font(.system(size: 20))
+                        Text(playerViewModel.playMode.rawValue)
+                            .font(.system(size: 9))
+                    }
+                    .frame(width: 50)
+                }
+                .foregroundStyle(playerViewModel.playMode == .playOnce ? .white.opacity(0.7) : .white)
+
+                Button {
+                    playerViewModel.skipBackward()
+                } label: {
+                    Image(systemName: "gobackward.15")
+                        .font(.system(size: 22))
+                }
+
+                Button {
+                    playerViewModel.showQueue = true
+                } label: {
+                    VStack(spacing: 2) {
+                        Image(systemName: "list.bullet")
+                            .font(.system(size: 22))
+                        if playerViewModel.upcomingSongs.count > 0 {
+                            Text("\(playerViewModel.upcomingSongs.count)")
+                                .font(.caption2)
+                        }
+                    }
+                }
+
+                Button {
+                    playerViewModel.skipForward()
+                } label: {
+                    Image(systemName: "goforward.15")
+                        .font(.system(size: 22))
+                }
+
+                // Rewind to Beginning Button
+                Button {
+                    playerViewModel.rewindToBeginning()
+                } label: {
+                    VStack(spacing: 2) {
+                        Image(systemName: "backward.fill")
+                            .font(.system(size: 20))
+                        Text("Rewind")
+                            .font(.system(size: 9))
+                    }
+                    .frame(width: 50)
+                }
+            }
+            .foregroundStyle(.white.opacity(0.7))
+
+            Spacer()
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background {
             if coverArtURL != nil {
                 AsyncImage(url: coverArtURL) { image in
                     image
@@ -24,180 +197,6 @@ struct NowPlayingView: View {
             } else {
                 Color.black.ignoresSafeArea()
             }
-
-            VStack(spacing: 16) {
-                // Drag handle
-                Capsule()
-                    .fill(Color.white.opacity(0.3))
-                    .frame(width: 40, height: 5)
-                    .padding(.top, 8)
-
-                // Album Art
-                AsyncImage(url: coverArtURL) { image in
-                    image
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                } placeholder: {
-                    PlaceholderArtView()
-                }
-                .frame(width: 280, height: 280)
-                .clipShape(RoundedRectangle(cornerRadius: 12))
-                .shadow(radius: 20)
-
-                // Track Info
-                VStack(spacing: 4) {
-                    Text(playerViewModel.currentSong?.title ?? "Not Playing")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .foregroundStyle(.white)
-                        .lineLimit(1)
-
-                    Text(playerViewModel.currentSong?.artist ?? "Unknown Artist")
-                        .font(.title3)
-                        .foregroundStyle(.white.opacity(0.7))
-                        .lineLimit(1)
-
-                    if let album = playerViewModel.currentSong?.album {
-                        Text(album)
-                            .font(.subheadline)
-                            .foregroundStyle(.white.opacity(0.5))
-                            .lineLimit(1)
-                    }
-                }
-                .padding(.horizontal)
-
-                // Like Button
-                Button {
-                    if let song = playerViewModel.currentSong {
-                        likesViewModel.toggleLike(song, context: modelContext)
-                    }
-                } label: {
-                    Image(likesViewModel.isLiked(playerViewModel.currentSong?.id ?? "") ? "PixelHeart" : "PixelHeartEmpty")
-                        .renderingMode(.original)
-                        .resizable()
-                        .interpolation(.none)
-                        .scaledToFit()
-                        .frame(width: 32, height: 32)
-                }
-
-                // Progress Bar
-                HStack(spacing: 10) {
-                    Text(playerViewModel.currentTimeFormatted)
-                        .font(.caption)
-                        .monospacedDigit()
-                        .foregroundColor(.white)
-
-                    ProgressView(value: playerViewModel.progress)
-                        .progressViewStyle(.linear)
-                        .tint(.cyan)
-                        .frame(height: 6)
-
-                    Text(playerViewModel.durationFormatted)
-                        .font(.caption)
-                        .monospacedDigit()
-                        .foregroundColor(.white)
-                }
-                .padding(.horizontal, 24)
-                .padding(.vertical, 10)
-
-                // Playback Controls
-                HStack(spacing: 40) {
-                    Button {
-                        playerViewModel.previous()
-                    } label: {
-                        Image(systemName: "backward.fill")
-                            .font(.system(size: 32))
-                    }
-
-                    Button {
-                        playerViewModel.togglePlayPause()
-                    } label: {
-                        ZStack {
-                            Circle()
-                                .fill(Color.white)
-                                .frame(width: 70, height: 70)
-
-                            if playerViewModel.isLoading {
-                                ProgressView()
-                                    .tint(.black)
-                            } else {
-                                Image(systemName: playerViewModel.isPlaying ? "pause.fill" : "play.fill")
-                                    .font(.system(size: 30))
-                                    .foregroundStyle(.black)
-                            }
-                        }
-                    }
-
-                    Button {
-                        playerViewModel.next()
-                    } label: {
-                        Image(systemName: "forward.fill")
-                            .font(.system(size: 32))
-                    }
-                }
-                .foregroundStyle(.white)
-
-                // Secondary Controls
-                HStack(spacing: 24) {
-                    // Play Mode Button
-                    Button {
-                        playerViewModel.cyclePlayMode()
-                    } label: {
-                        VStack(spacing: 2) {
-                            Image(systemName: playerViewModel.playMode.icon)
-                                .font(.system(size: 20))
-                            Text(playerViewModel.playMode.rawValue)
-                                .font(.system(size: 9))
-                        }
-                        .frame(width: 50)
-                    }
-                    .foregroundStyle(playerViewModel.playMode == .playOnce ? .white.opacity(0.7) : .white)
-
-                    Button {
-                        playerViewModel.skipBackward()
-                    } label: {
-                        Image(systemName: "gobackward.15")
-                            .font(.system(size: 22))
-                    }
-
-                    Button {
-                        playerViewModel.showQueue = true
-                    } label: {
-                        VStack(spacing: 2) {
-                            Image(systemName: "list.bullet")
-                                .font(.system(size: 22))
-                            if playerViewModel.upcomingSongs.count > 0 {
-                                Text("\(playerViewModel.upcomingSongs.count)")
-                                    .font(.caption2)
-                            }
-                        }
-                    }
-
-                    Button {
-                        playerViewModel.skipForward()
-                    } label: {
-                        Image(systemName: "goforward.15")
-                            .font(.system(size: 22))
-                    }
-
-                    // Rewind to Beginning Button
-                    Button {
-                        playerViewModel.rewindToBeginning()
-                    } label: {
-                        VStack(spacing: 2) {
-                            Image(systemName: "backward.fill")
-                                .font(.system(size: 20))
-                            Text("Rewind")
-                                .font(.system(size: 9))
-                        }
-                        .frame(width: 50)
-                    }
-                }
-                .foregroundStyle(.white.opacity(0.7))
-
-                Spacer()
-            }
-            .padding()
         }
         .onAppear {
             coverArtURL = playerViewModel.currentSong?.coverArt.flatMap {
