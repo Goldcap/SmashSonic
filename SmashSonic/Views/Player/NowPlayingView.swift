@@ -87,27 +87,17 @@ struct NowPlayingView: View {
                         .monospacedDigit()
                         .foregroundColor(.white)
 
-                    // Custom progress bar using GeometryReader
-                    GeometryReader { geo in
-                        ZStack(alignment: .leading) {
-                            // Background track
-                            Capsule()
-                                .fill(Color.white.opacity(0.3))
-
-                            // Progress fill
-                            Capsule()
-                                .fill(Color.cyan)
-                                .frame(width: geo.size.width * playerViewModel.progress)
-                        }
-                    }
-                    .frame(height: 6)
+                    ProgressView(value: playerViewModel.progress)
+                        .progressViewStyle(.linear)
+                        .tint(.cyan)
+                        .frame(height: 6)
 
                     Text(playerViewModel.durationFormatted)
                         .font(.caption)
                         .monospacedDigit()
                         .foregroundColor(.white)
                 }
-                .padding(.horizontal, 48)
+                .padding(.horizontal, 24)
                 .padding(.vertical, 10)
 
                 // Playback Controls
