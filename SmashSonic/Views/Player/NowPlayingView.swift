@@ -7,7 +7,6 @@ struct NowPlayingView: View {
     @Environment(\.dismiss) private var dismiss
     @Environment(\.modelContext) private var modelContext
     @State private var dragOffset: CGFloat = 0
-    @State private var showQueue = false
 
     var body: some View {
         ZStack {
@@ -173,7 +172,7 @@ struct NowPlayingView: View {
                     }
 
                     Button {
-                        showQueue = true
+                        playerViewModel.showQueue = true
                     } label: {
                         VStack(spacing: 2) {
                             Image(systemName: "list.bullet")
@@ -210,9 +209,6 @@ struct NowPlayingView: View {
                 Spacer()
             }
             .padding()
-        }
-        .sheet(isPresented: $showQueue) {
-            QueueView()
         }
         .gesture(
             DragGesture()
