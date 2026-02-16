@@ -38,6 +38,8 @@ final class AudioPlayer: ObservableObject {
     @Published var shuffleMode = false
     @Published var autoAddRandomSongs = false
     @Published var playMode: PlayMode = .playOnce
+    @Published var trackRadioSessionId: String? = nil
+    @Published var trackRadioSeedSong: Song? = nil
 
     private var player: AVPlayer?
     private var isLoadingMoreSongs = false
@@ -225,16 +227,27 @@ final class AudioPlayer: ObservableObject {
 
         do {
             let songsToAdd = count ?? randomSongsToAdd
-            let randomSongs = try await SubsonicClient.shared.getRandomSongs(size: songsToAdd)
+            let newSongs: [Song]
+            if let sessionId = trackRadioSessionId {
+                newSongs = try await SubsonicClient.shared.getTrackRadioSongs(sessionId: sessionId, count: songsToAdd)
+            } else {
+                newSongs = try await SubsonicClient.shared.getRandomSongs(size: songsToAdd)
+            }
             await MainActor.run {
-                queue.append(contentsOf: randomSongs)
+                queue.append(contentsOf: newSongs)
             }
         } catch {
-            print("Failed to load random songs: \(error)")
+            print("Failed to load songs: \(error)")
         }
     }
 
     func startRandomPlayback() async {
+        if let sessionId = trackRadioSessionId {
+            try? await SubsonicClient.shared.stopTrackRadio(sessionId: sessionId)
+        }
+        trackRadioSessionId = nil
+        trackRadioSeedSong = nil
+
         autoAddRandomSongs = true
         isLoadingMoreSongs = true
         defer { isLoadingMoreSongs = false }
@@ -250,6 +263,37 @@ final class AudioPlayer: ObservableObject {
             }
         } catch {
             print("Failed to start random playback: \(error)")
+        }
+    }
+
+    func startTrackRadio(song: Song) async {
+        // Stop any existing radio session
+        if let existingSession = trackRadioSessionId {
+            try? await SubsonicClient.shared.stopTrackRadio(sessionId: existingSession)
+        }
+
+        autoAddRandomSongs = false
+        isLoadingMoreSongs = true
+        defer { isLoadingMoreSongs = false }
+
+        do {
+            let (sessionId, songs) = try await SubsonicClient.shared.startTrackRadio(songId: song.id, count: 20)
+            await MainActor.run {
+                self.trackRadioSessionId = sessionId
+                self.trackRadioSeedSong = song
+                self.autoAddRandomSongs = true
+                if let first = songs.first {
+                    self.queue = songs
+                    self.currentIndex = 0
+                    self.loadAndPlay(first)
+                }
+            }
+        } catch {
+            print("Failed to start track radio: \(error)")
+            await MainActor.run {
+                self.trackRadioSessionId = nil
+                self.trackRadioSeedSong = nil
+            }
         }
     }
 
@@ -321,12 +365,17 @@ final class AudioPlayer: ObservableObject {
     }
 
     func clearQueue() {
+        if let sessionId = trackRadioSessionId {
+            Task { try? await SubsonicClient.shared.stopTrackRadio(sessionId: sessionId) }
+        }
         queue = []
         currentIndex = 0
         currentSong = nil
         player?.pause()
         isPlaying = false
         autoAddRandomSongs = false
+        trackRadioSessionId = nil
+        trackRadioSeedSong = nil
     }
 
     func play() {

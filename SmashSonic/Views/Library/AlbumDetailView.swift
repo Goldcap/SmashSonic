@@ -244,6 +244,14 @@ struct SongRow: View {
                 Divider()
 
                 Button {
+                    playerViewModel.startTrackRadio(song: song)
+                } label: {
+                    Label("Start Radio", systemImage: "antenna.radiowaves.left.and.right")
+                }
+
+                Divider()
+
+                Button {
                     likesViewModel.toggleLike(song, context: modelContext)
                 } label: {
                     HStack {

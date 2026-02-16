@@ -49,6 +49,15 @@ struct MiniPlayerView: View {
                         .font(.caption)
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+
+                    if playerViewModel.isTrackRadioActive {
+                        HStack(spacing: 2) {
+                            Image(systemName: "antenna.radiowaves.left.and.right")
+                            Text("Radio")
+                        }
+                        .font(.system(size: 9))
+                        .foregroundStyle(.cyan)
+                    }
                 }
 
                 Spacer()

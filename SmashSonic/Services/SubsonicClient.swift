@@ -225,6 +225,37 @@ final class SubsonicClient: ObservableObject {
 
         return songs.compactMap { Song(from: $0) }
     }
+
+    // MARK: - Track Radio
+
+    func startTrackRadio(songId: String, count: Int = 20) async throws -> (sessionId: String, songs: [Song]) {
+        let response = try await fetchData(endpoint: "startTrackRadio", params: [
+            "id": songId,
+            "count": String(count)
+        ])
+        guard let session = response["trackRadioSession"] as? [String: Any],
+              let sessionId = session["sessionId"] as? String else {
+            throw SubsonicError.invalidResponse
+        }
+        let songs = (session["song"] as? [[String: Any]])?.compactMap { Song(from: $0) } ?? []
+        return (sessionId, songs)
+    }
+
+    func getTrackRadioSongs(sessionId: String, count: Int = 10) async throws -> [Song] {
+        let response = try await fetchData(endpoint: "getTrackRadioSongs", params: [
+            "sessionId": sessionId,
+            "count": String(count)
+        ])
+        guard let radioSongs = response["trackRadioSongs"] as? [String: Any],
+              let songs = radioSongs["song"] as? [[String: Any]] else {
+            return []
+        }
+        return songs.compactMap { Song(from: $0) }
+    }
+
+    func stopTrackRadio(sessionId: String) async throws {
+        _ = try await fetchData(endpoint: "stopTrackRadio", params: ["sessionId": sessionId])
+    }
 }
 
 // MARK: - Response Types

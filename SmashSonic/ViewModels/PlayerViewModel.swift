@@ -14,6 +14,8 @@ final class PlayerViewModel: ObservableObject {
     @Published var showQueue = false
     @Published var autoAddRandomSongs = false
     @Published var playMode: PlayMode = .playOnce
+    @Published var trackRadioSessionId: String? = nil
+    @Published var trackRadioSeedSong: Song? = nil
 
     private var cancellables = Set<AnyCancellable>()
     private let audioPlayer = AudioPlayer.shared
@@ -54,6 +56,14 @@ final class PlayerViewModel: ObservableObject {
         audioPlayer.$playMode
             .receive(on: DispatchQueue.main)
             .assign(to: &$playMode)
+
+        audioPlayer.$trackRadioSessionId
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$trackRadioSessionId)
+
+        audioPlayer.$trackRadioSeedSong
+            .receive(on: DispatchQueue.main)
+            .assign(to: &$trackRadioSeedSong)
     }
 
     func play(_ song: Song, queue: [Song]? = nil) {
@@ -121,6 +131,16 @@ final class PlayerViewModel: ObservableObject {
         Task {
             await audioPlayer.startRandomPlayback()
         }
+    }
+
+    func startTrackRadio(song: Song) {
+        Task {
+            await audioPlayer.startTrackRadio(song: song)
+        }
+    }
+
+    var isTrackRadioActive: Bool {
+        trackRadioSessionId != nil
     }
 
     func addRandomSongsToQueue(count: Int = 10) {

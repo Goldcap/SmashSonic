@@ -46,6 +46,23 @@ struct NowPlayingView: View {
                         .foregroundStyle(.white.opacity(0.5))
                         .lineLimit(1)
                 }
+
+                if playerViewModel.isTrackRadioActive {
+                    HStack(spacing: 4) {
+                        Image(systemName: "antenna.radiowaves.left.and.right")
+                        Text("Radio")
+                        if let seed = playerViewModel.trackRadioSeedSong {
+                            Text("· \(seed.title)")
+                                .lineLimit(1)
+                        }
+                    }
+                    .font(.caption)
+                    .foregroundStyle(.cyan)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(Color.cyan.opacity(0.15))
+                    .clipShape(Capsule())
+                }
             }
             .padding(.horizontal)
 
