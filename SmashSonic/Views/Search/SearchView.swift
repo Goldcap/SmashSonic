@@ -113,7 +113,8 @@ struct SearchView: View {
                                     }
                                 }
                             }
-                            .padding(.vertical)
+                            .padding(.top)
+                            .padding(.bottom, playerViewModel.currentSong != nil ? 180 : 100)
                         }
                         .scrollDismissesKeyboard(.interactively)
                     } else if !viewModel.hasSearched {

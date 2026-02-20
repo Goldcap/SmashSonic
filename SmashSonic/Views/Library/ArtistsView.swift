@@ -49,6 +49,7 @@ struct ArtistsView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
+                .contentMargins(.bottom, 100, for: .scrollContent)
                 .refreshable {
                     await viewModel.loadArtists()
                 }
@@ -117,7 +118,8 @@ struct ArtistDetailView: View {
                         }
                     }
                 }
-                .padding(.vertical)
+                .padding(.top)
+                .padding(.bottom, 100)
             }
             .scrollContentBackground(.hidden)
         }

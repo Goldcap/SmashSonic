@@ -55,6 +55,7 @@ struct AlbumsView: View {
                         }
                     }
                     .padding()
+                    .padding(.bottom, 100)
                 }
                 .refreshable {
                     await viewModel.loadAlbums()

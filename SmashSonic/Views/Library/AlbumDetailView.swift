@@ -135,7 +135,7 @@ struct AlbumDetailView: View {
                             Divider()
                         }
                     }
-                    .padding(.bottom, 80)
+                    .padding(.bottom, 100)
                 }
             }
         }
