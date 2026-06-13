@@ -6,6 +6,24 @@ struct NowPlayingView: View {
     @StateObject private var likesViewModel = LikesViewModel()
     @Environment(\.modelContext) private var modelContext
     @State private var coverArtURL: URL?
+    @State private var isScrubbing = false
+    @State private var scrubTime: Double = 0
+
+    /// While dragging, the slider follows the user's finger (scrubTime); otherwise
+    /// it tracks playback (currentTime). Seeking is committed on release.
+    private var scrubBinding: Binding<Double> {
+        Binding(
+            get: { isScrubbing ? scrubTime : playerViewModel.currentTime },
+            set: { scrubTime = $0 }
+        )
+    }
+
+    private func formatTime(_ time: TimeInterval) -> String {
+        guard time.isFinite else { return "0:00" }
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%d:%02d", minutes, seconds)
+    }
 
     var body: some View {
         VStack(spacing: 16) {
@@ -80,22 +98,36 @@ struct NowPlayingView: View {
                     .frame(width: 32, height: 32)
             }
 
-            // Progress Bar
-            HStack(spacing: 10) {
-                Text(playerViewModel.currentTimeFormatted)
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundColor(.white)
+            // Progress Bar (scrubbable)
+            VStack(spacing: 2) {
+                Slider(
+                    value: scrubBinding,
+                    in: 0...max(playerViewModel.duration, 0.1),
+                    onEditingChanged: { editing in
+                        if editing {
+                            isScrubbing = true
+                        } else {
+                            playerViewModel.seek(to: scrubTime)
+                            isScrubbing = false
+                        }
+                    }
+                )
+                .tint(.cyan)
+                .disabled(playerViewModel.duration <= 0)
 
-                ProgressView(value: playerViewModel.progress)
-                    .progressViewStyle(.linear)
-                    .tint(.cyan)
-                    .frame(height: 6)
+                HStack {
+                    Text(formatTime(isScrubbing ? scrubTime : playerViewModel.currentTime))
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundColor(.white)
 
-                Text(playerViewModel.durationFormatted)
-                    .font(.caption)
-                    .monospacedDigit()
-                    .foregroundColor(.white)
+                    Spacer()
+
+                    Text(playerViewModel.durationFormatted)
+                        .font(.caption)
+                        .monospacedDigit()
+                        .foregroundColor(.white)
+                }
             }
             .padding(.horizontal, 24)
             .padding(.vertical, 10)
