@@ -96,7 +96,7 @@ struct CustomTabBar: View {
     private let tabs: [(icon: String, systemIcon: String?, label: String, action: TabAction)] = [
         ("PixelHome", nil, "Home", .none),
         ("PixelBrowse", nil, "Browse", .none),
-        ("PixelHeart", "heart.fill", "Liked", .none),
+        ("PixelHeart", "heart.fill", "Favorites", .none),
         ("PixelSearch", nil, "Search", .none),
         ("PixelQueue", "music.note.list", "Queue", .queue),
         ("PixelRandom", "shuffle", "Random", .random)
@@ -186,7 +186,7 @@ struct MenuView: View {
                         selectedTab = 1
                         dismiss()
                     }
-                    MenuRow(icon: "PixelHeart", systemIcon: "heart.fill", label: "Liked Songs") {
+                    MenuRow(icon: "PixelHeart", systemIcon: "heart.fill", label: "Favorites") {
                         selectedTab = 2
                         dismiss()
                     }
@@ -330,9 +330,9 @@ struct HomeView: View {
                                             .scaledToFit()
                                             .frame(width: 32, height: 32)
                                         VStack(alignment: .leading) {
-                                            Text("Liked Songs")
+                                            Text("Favorites")
                                                 .font(.headline)
-                                            Text("\(likedSongs.count) tracks")
+                                            Text("\(likedSongs.count) liked songs")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
                                         }

@@ -9,6 +9,11 @@ final class LikesManager: ObservableObject {
     @Published var starredAlbumIds: Set<String> = []
     @Published var starredArtistIds: Set<String> = []
 
+    /// Full starred objects (for display on the Favorites screen). Kept in sync
+    /// with the *Ids sets above.
+    @Published var starredAlbums: [Album] = []
+    @Published var starredArtists: [Artist] = []
+
     private var modelContext: ModelContext?
 
     private init() {}
@@ -49,10 +54,12 @@ final class LikesManager: ObservableObject {
     /// SwiftData; albums/artists rely on the server as the source of truth.
     func loadStarredFromServer() {
         Task {
-            guard let result = try? await SubsonicClient.shared.getStarredIDs() else { return }
+            guard let result = try? await SubsonicClient.shared.getStarredAlbumsAndArtists() else { return }
             DispatchQueue.main.async { [weak self] in
-                self?.starredArtistIds = result.artists
-                self?.starredAlbumIds = result.albums
+                self?.starredArtists = result.artists
+                self?.starredAlbums = result.albums
+                self?.starredArtistIds = Set(result.artists.map { $0.id })
+                self?.starredAlbumIds = Set(result.albums.map { $0.id })
             }
         }
     }
@@ -62,10 +69,15 @@ final class LikesManager: ObservableObject {
         let wasStarred = starredAlbumIds.contains(id)
 
         DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             if wasStarred {
-                self?.starredAlbumIds.remove(id)
+                self.starredAlbumIds.remove(id)
+                self.starredAlbums.removeAll { $0.id == id }
             } else {
-                self?.starredAlbumIds.insert(id)
+                self.starredAlbumIds.insert(id)
+                if !self.starredAlbums.contains(where: { $0.id == id }) {
+                    self.starredAlbums.insert(album, at: 0)
+                }
             }
         }
 
@@ -85,10 +97,15 @@ final class LikesManager: ObservableObject {
         let wasStarred = starredArtistIds.contains(id)
 
         DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             if wasStarred {
-                self?.starredArtistIds.remove(id)
+                self.starredArtistIds.remove(id)
+                self.starredArtists.removeAll { $0.id == id }
             } else {
-                self?.starredArtistIds.insert(id)
+                self.starredArtistIds.insert(id)
+                if !self.starredArtists.contains(where: { $0.id == id }) {
+                    self.starredArtists.insert(artist, at: 0)
+                }
             }
         }
 

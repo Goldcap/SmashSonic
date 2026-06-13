@@ -231,17 +231,17 @@ final class SubsonicClient: ObservableObject {
         return songs.compactMap { Song(from: $0) }
     }
 
-    /// Fetches the set of currently-starred artist and album IDs from the server.
-    func getStarredIDs() async throws -> (artists: Set<String>, albums: Set<String>) {
+    /// Fetches the currently-starred artists and albums (full objects) from the server.
+    func getStarredAlbumsAndArtists() async throws -> (artists: [Artist], albums: [Album]) {
         let response = try await fetchData(endpoint: "getStarred2")
 
         guard let starred = response["starred2"] as? [String: Any] else {
             return ([], [])
         }
 
-        let artistIds = (starred["artist"] as? [[String: Any]])?.compactMap { $0["id"] as? String } ?? []
-        let albumIds = (starred["album"] as? [[String: Any]])?.compactMap { $0["id"] as? String } ?? []
-        return (Set(artistIds), Set(albumIds))
+        let artists = (starred["artist"] as? [[String: Any]])?.compactMap { Artist(from: $0) } ?? []
+        let albums = (starred["album"] as? [[String: Any]])?.compactMap { Album(from: $0) } ?? []
+        return (artists, albums)
     }
 
     func getRandomSongs(size: Int = 50) async throws -> [Song] {

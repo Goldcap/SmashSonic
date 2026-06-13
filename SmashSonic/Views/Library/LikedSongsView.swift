@@ -5,10 +5,15 @@ struct LikedSongsView: View {
     @ObservedObject var viewModel: LikesViewModel
     var showMenu: Binding<Bool>? = nil
     @ObservedObject private var settingsManager = SettingsManager.shared
+    @ObservedObject private var likesManager = LikesManager.shared
     @EnvironmentObject var playerViewModel: PlayerViewModel
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \LikedSong.likedAt, order: .reverse) private var likedSongs: [LikedSong]
     @State private var isSyncing = false
+
+    private var hasAnyFavorites: Bool {
+        !likedSongs.isEmpty || !likesManager.starredArtists.isEmpty || !likesManager.starredAlbums.isEmpty
+    }
 
     var body: some View {
         NavigationStack {
@@ -16,7 +21,7 @@ struct LikedSongsView: View {
                 backgroundView
                     .ignoresSafeArea()
 
-                if likedSongs.isEmpty {
+                if !hasAnyFavorites {
                     VStack {
                         Spacer()
                             .frame(height: 100)
@@ -26,11 +31,11 @@ struct LikedSongsView: View {
                             .interpolation(.none)
                             .scaledToFit()
                             .frame(width: 64, height: 64)
-                        Text("No Liked Songs")
+                        Text("No Favorites Yet")
                             .font(.title2)
                             .fontWeight(.semibold)
                             .padding(.top, 8)
-                        Text("Songs you like will appear here.\nPull down to sync from server.")
+                        Text("Artists, albums, and songs you favorite\nwill appear here. Pull down to sync from server.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -40,28 +45,72 @@ struct LikedSongsView: View {
                     .frame(maxWidth: .infinity)
                 } else {
                     List {
-                        Section {
-                            ForEach(likedSongs) { likedSong in
-                                LikedSongRow(
-                                    likedSong: likedSong,
-                                    isPlaying: playerViewModel.currentSong?.id == likedSong.id
-                                )
-                                .listRowBackground(Color.black.opacity(0.5))
-                                .onTapGesture {
-                                    let songs = likedSongs.map { $0.toSong() }
-                                    playerViewModel.play(likedSong.toSong(), queue: songs)
+                        // Artists
+                        if !likesManager.starredArtists.isEmpty {
+                            Section {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 16) {
+                                        ForEach(likesManager.starredArtists) { artist in
+                                            NavigationLink(destination: ArtistDetailView(artist: artist, viewModel: LibraryViewModel())) {
+                                                FavoriteArtistChip(artist: artist)
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
                                 }
+                                .listRowInsets(EdgeInsets())
+                                .listRowBackground(Color.clear)
+                            } header: {
+                                Text("Artists")
                             }
-                            .onDelete { indexSet in
-                                for index in indexSet {
-                                    let song = likedSongs[index]
-                                    viewModel.unlike(song.id, context: modelContext)
+                        }
+
+                        // Albums
+                        if !likesManager.starredAlbums.isEmpty {
+                            Section {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 16) {
+                                        ForEach(likesManager.starredAlbums) { album in
+                                            NavigationLink(destination: AlbumDetailView(album: album)) {
+                                                SearchAlbumCard(album: album)
+                                            }
+                                            .buttonStyle(.plain)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                    .padding(.vertical, 8)
                                 }
+                                .listRowInsets(EdgeInsets())
+                                .listRowBackground(Color.clear)
+                            } header: {
+                                Text("Albums")
                             }
-                        } header: {
-                            HStack {
+                        }
+
+                        // Songs
+                        if !likedSongs.isEmpty {
+                            Section {
+                                ForEach(likedSongs) { likedSong in
+                                    LikedSongRow(
+                                        likedSong: likedSong,
+                                        isPlaying: playerViewModel.currentSong?.id == likedSong.id
+                                    )
+                                    .listRowBackground(Color.black.opacity(0.5))
+                                    .onTapGesture {
+                                        let songs = likedSongs.map { $0.toSong() }
+                                        playerViewModel.play(likedSong.toSong(), queue: songs)
+                                    }
+                                }
+                                .onDelete { indexSet in
+                                    for index in indexSet {
+                                        let song = likedSongs[index]
+                                        viewModel.unlike(song.id, context: modelContext)
+                                    }
+                                }
+                            } header: {
                                 Text("\(likedSongs.count) songs")
-                                Spacer()
                             }
                         }
                     }
@@ -70,7 +119,7 @@ struct LikedSongsView: View {
                     .contentMargins(.bottom, playerViewModel.bottomContentInset, for: .scrollContent)
                 }
             }
-            .navigationTitle("Liked Songs")
+            .navigationTitle("Favorites")
             .toolbarBackground(.hidden, for: .navigationBar)
             .refreshable {
                 await syncFromServer()
@@ -148,6 +197,9 @@ struct LikedSongsView: View {
         } catch {
             print("Failed to sync starred songs: \(error)")
         }
+
+        // Refresh starred artists & albums from the server too.
+        LikesManager.shared.loadStarredFromServer()
     }
 
     @ViewBuilder
@@ -165,6 +217,36 @@ struct LikedSongsView: View {
             } else {
                 Color(.systemBackground)
             }
+        }
+    }
+}
+
+struct FavoriteArtistChip: View {
+    let artist: Artist
+
+    var body: some View {
+        VStack(spacing: 8) {
+            AsyncImage(url: artist.coverArt.flatMap { SubsonicClient.shared.coverArtURL(for: $0, size: 200) }) { image in
+                image
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+            } placeholder: {
+                Circle()
+                    .fill(Color.secondary.opacity(0.2))
+                    .overlay {
+                        Image(systemName: "person.circle.fill")
+                            .font(.largeTitle)
+                            .foregroundStyle(.secondary)
+                    }
+            }
+            .frame(width: 90, height: 90)
+            .clipShape(Circle())
+
+            Text(artist.name)
+                .font(.caption)
+                .fontWeight(.medium)
+                .lineLimit(1)
+                .frame(width: 100)
         }
     }
 }
