@@ -108,6 +108,11 @@ final class AudioPlayer: ObservableObject {
         isLoading = true
         currentSong = song
 
+        // Reset progress for the new track so the scrubber starts at 0 instead of
+        // lingering at the previous track's position until the time observer fires.
+        currentTime = 0
+        duration = Double(song.duration ?? 0)
+
         // Check for local file first
         if let localURL = DownloadManager.shared.localURL(for: song.id) {
             setupPlayer(with: localURL)
@@ -416,9 +421,21 @@ final class AudioPlayer: ObservableObject {
     }
 
     func seek(to time: TimeInterval) {
-        player?.seek(to: CMTime(seconds: time, preferredTimescale: 600))
+        guard let player else { return }
+        let wasPlaying = isPlaying
         currentTime = time
-        updateNowPlayingProgress()
+        // Seeking a streamed item forces a re-buffer; AVPlayer can stall and not
+        // resume on its own, so explicitly resume playback once the seek lands.
+        player.seek(to: CMTime(seconds: time, preferredTimescale: 600)) { [weak self] _ in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                if wasPlaying {
+                    self.player?.play()
+                    self.isPlaying = true
+                }
+                self.updateNowPlayingProgress()
+            }
+        }
     }
 
     func rewindToBeginning() {
