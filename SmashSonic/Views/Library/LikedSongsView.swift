@@ -67,7 +67,7 @@ struct LikedSongsView: View {
                     }
                     .listStyle(.insetGrouped)
                     .scrollContentBackground(.hidden)
-                    .contentMargins(.bottom, playerViewModel.currentSong != nil ? 180 : 100, for: .scrollContent)
+                    .contentMargins(.bottom, playerViewModel.bottomContentInset, for: .scrollContent)
                 }
             }
             .navigationTitle("Liked Songs")

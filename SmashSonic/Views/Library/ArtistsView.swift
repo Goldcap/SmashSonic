@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ArtistsView: View {
     @ObservedObject var viewModel: LibraryViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
 
     var body: some View {
         Group {
@@ -49,7 +50,7 @@ struct ArtistsView: View {
                 }
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
-                .contentMargins(.bottom, 100, for: .scrollContent)
+                .contentMargins(.bottom, playerViewModel.bottomContentInset, for: .scrollContent)
                 .refreshable {
                     await viewModel.loadArtists()
                 }
@@ -100,6 +101,8 @@ struct ArtistDetailView: View {
     let artist: Artist
     @ObservedObject var viewModel: LibraryViewModel
     @ObservedObject private var settingsManager = SettingsManager.shared
+    @ObservedObject private var likesManager = LikesManager.shared
+    @EnvironmentObject var playerViewModel: PlayerViewModel
     @State private var artistDetail: ArtistDetail?
 
     var body: some View {
@@ -119,12 +122,19 @@ struct ArtistDetailView: View {
                     }
                 }
                 .padding(.top)
-                .padding(.bottom, 100)
+                .padding(.bottom, playerViewModel.bottomContentInset)
             }
             .scrollContentBackground(.hidden)
         }
         .navigationTitle(artist.name)
         .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                FavoriteButton(isFavorite: likesManager.isArtistStarred(artist.id)) {
+                    Task { await likesManager.toggleArtistStar(artist) }
+                }
+            }
+        }
         .task {
             artistDetail = await viewModel.loadArtist(id: artist.id)
         }

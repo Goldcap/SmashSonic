@@ -375,7 +375,7 @@ struct HomeView: View {
                         }
                     }
                     .padding(.top)
-                    .padding(.bottom, playerViewModel.currentSong != nil ? 180 : 100)
+                    .padding(.bottom, playerViewModel.bottomContentInset)
                 }
                 .scrollContentBackground(.hidden)
             }
@@ -735,7 +735,7 @@ struct PlaylistDetailView: View {
                             Divider()
                         }
                     }
-                    .padding(.bottom, 100)
+                    .padding(.bottom, playerViewModel.bottomContentInset)
                 }
             }
             }

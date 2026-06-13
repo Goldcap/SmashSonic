@@ -6,6 +6,8 @@ final class LikesManager: ObservableObject {
     static let shared = LikesManager()
 
     @Published var likedSongIds: Set<String> = []
+    @Published var starredAlbumIds: Set<String> = []
+    @Published var starredArtistIds: Set<String> = []
 
     private var modelContext: ModelContext?
 
@@ -14,10 +16,19 @@ final class LikesManager: ObservableObject {
     func setModelContext(_ context: ModelContext) {
         self.modelContext = context
         loadLikedSongs()
+        loadStarredFromServer()
     }
 
     func isLiked(_ songId: String) -> Bool {
         likedSongIds.contains(songId)
+    }
+
+    func isAlbumStarred(_ albumId: String) -> Bool {
+        starredAlbumIds.contains(albumId)
+    }
+
+    func isArtistStarred(_ artistId: String) -> Bool {
+        starredArtistIds.contains(artistId)
     }
 
     func loadLikedSongs() {
@@ -28,6 +39,67 @@ final class LikesManager: ObservableObject {
             DispatchQueue.main.async { [weak self] in
                 self?.likedSongIds = Set(songs.map { $0.id })
             }
+        }
+    }
+
+    // MARK: - Album & Artist Favorites
+
+    /// Loads the set of starred albums and artists from the server so favorite
+    /// state survives across launches. Songs continue to be backed locally by
+    /// SwiftData; albums/artists rely on the server as the source of truth.
+    func loadStarredFromServer() {
+        Task {
+            guard let result = try? await SubsonicClient.shared.getStarredIDs() else { return }
+            DispatchQueue.main.async { [weak self] in
+                self?.starredArtistIds = result.artists
+                self?.starredAlbumIds = result.albums
+            }
+        }
+    }
+
+    func toggleAlbumStar(_ album: Album) async {
+        let id = album.id
+        let wasStarred = starredAlbumIds.contains(id)
+
+        DispatchQueue.main.async { [weak self] in
+            if wasStarred {
+                self?.starredAlbumIds.remove(id)
+            } else {
+                self?.starredAlbumIds.insert(id)
+            }
+        }
+
+        do {
+            if wasStarred {
+                try await SubsonicClient.shared.unstar(albumId: id)
+            } else {
+                try await SubsonicClient.shared.star(albumId: id)
+            }
+        } catch {
+            print("Failed to update album star on server: \(error)")
+        }
+    }
+
+    func toggleArtistStar(_ artist: Artist) async {
+        let id = artist.id
+        let wasStarred = starredArtistIds.contains(id)
+
+        DispatchQueue.main.async { [weak self] in
+            if wasStarred {
+                self?.starredArtistIds.remove(id)
+            } else {
+                self?.starredArtistIds.insert(id)
+            }
+        }
+
+        do {
+            if wasStarred {
+                try await SubsonicClient.shared.unstar(artistId: id)
+            } else {
+                try await SubsonicClient.shared.star(artistId: id)
+            }
+        } catch {
+            print("Failed to update artist star on server: \(error)")
         }
     }
 

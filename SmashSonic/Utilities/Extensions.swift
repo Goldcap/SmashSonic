@@ -44,3 +44,12 @@ extension Color {
     static let accentRed = Color(red: 150/255, green: 21/255, blue: 21/255)
     static let accentYellow = Color(red: 228/255, green: 242/255, blue: 61/255)
 }
+
+extension PlayerViewModel {
+    /// Bottom inset for scrolling content so nothing is ever hidden behind the
+    /// tab bar (and the mini player, when a track is playing). Single source of
+    /// truth used by every scroll view in the app.
+    var bottomContentInset: CGFloat {
+        currentSong != nil ? 180 : 100
+    }
+}

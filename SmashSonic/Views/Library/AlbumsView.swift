@@ -2,6 +2,7 @@ import SwiftUI
 
 struct AlbumsView: View {
     @ObservedObject var viewModel: LibraryViewModel
+    @EnvironmentObject var playerViewModel: PlayerViewModel
 
     let columns = [
         GridItem(.adaptive(minimum: 150), spacing: 16)
@@ -55,7 +56,7 @@ struct AlbumsView: View {
                         }
                     }
                     .padding()
-                    .padding(.bottom, 100)
+                    .padding(.bottom, playerViewModel.bottomContentInset)
                 }
                 .refreshable {
                     await viewModel.loadAlbums()

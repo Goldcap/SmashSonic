@@ -8,6 +8,7 @@ struct AlbumDetailView: View {
     @StateObject private var viewModel = LibraryViewModel()
     @StateObject private var downloadsViewModel = DownloadsViewModel()
     @StateObject private var likesViewModel = LikesViewModel()
+    @ObservedObject private var likesManager = LikesManager.shared
     @State private var loadedAlbum: Album?
 
     var displayAlbum: Album {
@@ -135,7 +136,7 @@ struct AlbumDetailView: View {
                             Divider()
                         }
                     }
-                    .padding(.bottom, 100)
+                    .padding(.bottom, playerViewModel.bottomContentInset)
                 }
             }
         }
@@ -144,6 +145,13 @@ struct AlbumDetailView: View {
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbarBackground(.ultraThinMaterial, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                FavoriteButton(isFavorite: likesManager.isAlbumStarred(album.id)) {
+                    Task { await likesManager.toggleAlbumStar(album) }
+                }
+            }
+        }
         .task {
             loadedAlbum = await viewModel.loadAlbum(id: album.id)
         }
@@ -292,5 +300,27 @@ struct SongRow: View {
         .onTapGesture {
             playerViewModel.play(song, queue: songs)
         }
+    }
+}
+
+// MARK: - Favorite Button
+
+/// Pixel-art heart toggle used to favorite albums and artists. Shared across
+/// the album and artist detail screens.
+struct FavoriteButton: View {
+    let isFavorite: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Image(isFavorite ? "PixelHeart" : "PixelHeartEmpty")
+                .renderingMode(.original)
+                .resizable()
+                .interpolation(.none)
+                .scaledToFit()
+                .frame(width: 26, height: 26)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(isFavorite ? "Unfavorite" : "Favorite")
     }
 }
