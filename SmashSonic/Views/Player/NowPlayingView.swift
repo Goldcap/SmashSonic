@@ -25,6 +25,11 @@ struct NowPlayingView: View {
         return String(format: "%d:%02d", minutes, seconds)
     }
 
+    private func resetScrub() {
+        isScrubbing = false
+        scrubTime = 0
+    }
+
     var body: some View {
         VStack(spacing: 16) {
             // Drag handle
@@ -248,11 +253,14 @@ struct NowPlayingView: View {
             }
         }
         .onAppear {
+            resetScrub()
             coverArtURL = playerViewModel.currentSong?.coverArt.flatMap {
                 SubsonicClient.shared.coverArtURL(for: $0, size: 600)
             }
         }
         .onChange(of: playerViewModel.currentSong?.id) {
+            // New track: drop any leftover scrub state so the slider snaps to 0.
+            resetScrub()
             coverArtURL = playerViewModel.currentSong?.coverArt.flatMap {
                 SubsonicClient.shared.coverArtURL(for: $0, size: 600)
             }
