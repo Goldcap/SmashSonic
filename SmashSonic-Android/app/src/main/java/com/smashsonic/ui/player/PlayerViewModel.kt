@@ -53,7 +53,7 @@ class PlayerViewModel @Inject constructor(
         if (idx > 0) q.take(idx).takeLast(20) else emptyList()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    private fun formatTime(ms: Long): String {
+    fun formatTime(ms: Long): String {
         val totalSeconds = (ms / 1000).toInt()
         val minutes = totalSeconds / 60
         val seconds = totalSeconds % 60

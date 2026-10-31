@@ -6,7 +6,7 @@ sealed class Route(val route: String) {
     data object Home : Route("home")
     data object Browse : Route("browse")
     data object Search : Route("search")
-    data object LikedSongs : Route("liked_songs")
+    data object Favorites : Route("favorites")
     data object Downloads : Route("downloads")
     data object Settings : Route("settings")
     data object AppearanceSettings : Route("appearance_settings")

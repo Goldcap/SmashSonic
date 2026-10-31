@@ -40,10 +40,18 @@ interface SubsonicApi {
     ): SubsonicResponseWrapper
 
     @GET("rest/star")
-    suspend fun star(@Query("id") id: String): SubsonicResponseWrapper
+    suspend fun star(
+        @Query("id") id: String? = null,
+        @Query("albumId") albumId: String? = null,
+        @Query("artistId") artistId: String? = null,
+    ): SubsonicResponseWrapper
 
     @GET("rest/unstar")
-    suspend fun unstar(@Query("id") id: String): SubsonicResponseWrapper
+    suspend fun unstar(
+        @Query("id") id: String? = null,
+        @Query("albumId") albumId: String? = null,
+        @Query("artistId") artistId: String? = null,
+    ): SubsonicResponseWrapper
 
     @GET("rest/getStarred2")
     suspend fun getStarred2(): SubsonicResponseWrapper

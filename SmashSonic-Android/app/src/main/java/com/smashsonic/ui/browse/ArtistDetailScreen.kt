@@ -8,6 +8,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,11 +21,13 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.smashsonic.data.model.Album
+import com.smashsonic.data.model.Artist
 import com.smashsonic.data.model.ArtistDetail
 import com.smashsonic.data.remote.SubsonicUrlBuilder
 import com.smashsonic.ui.components.CoverArtImage
 import com.smashsonic.ui.components.SmashSonicBackground
 import com.smashsonic.ui.home.HomeScreenUrlHelper
+import com.smashsonic.ui.likes.LikesViewModel
 import com.smashsonic.ui.navigation.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,9 +37,11 @@ fun ArtistDetailScreen(
     navController: NavController,
     onBack: () -> Unit,
     viewModel: BrowseViewModel = hiltViewModel(),
+    likesViewModel: LikesViewModel = hiltViewModel(),
     urlBuilder: SubsonicUrlBuilder = hiltViewModel<HomeScreenUrlHelper>().urlBuilder,
 ) {
     var artistDetail by remember { mutableStateOf<ArtistDetail?>(null) }
+    val starredArtistIds by likesViewModel.starredArtistIds.collectAsState()
 
     LaunchedEffect(artistId) {
         artistDetail = viewModel.loadArtist(artistId)
@@ -49,6 +55,22 @@ fun ArtistDetailScreen(
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    actions = {
+                        artistDetail?.let { d ->
+                            val isStarred = d.id in starredArtistIds
+                            IconButton(onClick = {
+                                likesViewModel.toggleArtistStar(
+                                    Artist(id = d.id, name = d.name, albumCount = d.albumCount, coverArt = d.coverArt)
+                                )
+                            }) {
+                                Icon(
+                                    if (isStarred) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    contentDescription = if (isStarred) "Unfavorite artist" else "Favorite artist",
+                                    tint = if (isStarred) Color.Red else MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),

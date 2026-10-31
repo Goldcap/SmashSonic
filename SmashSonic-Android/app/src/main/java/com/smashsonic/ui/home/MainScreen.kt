@@ -21,7 +21,8 @@ import androidx.navigation.NavController
 import com.smashsonic.R
 import com.smashsonic.ui.browse.BrowseScreen
 import com.smashsonic.ui.components.SmashSonicBackground
-import com.smashsonic.ui.likes.LikedSongsScreen
+import com.smashsonic.ui.likes.FavoritesScreen
+import com.smashsonic.ui.likes.LikesViewModel
 import com.smashsonic.ui.navigation.Route
 import com.smashsonic.ui.player.MiniPlayer
 import com.smashsonic.ui.player.PlayerViewModel
@@ -32,17 +33,22 @@ import com.smashsonic.ui.search.SearchScreen
 fun MainScreen(
     navController: NavController,
     playerViewModel: PlayerViewModel = hiltViewModel(),
+    likesViewModel: LikesViewModel = hiltViewModel(),
 ) {
     var selectedTab by remember { mutableIntStateOf(0) }
     var showMenu by remember { mutableStateOf(false) }
     val currentSong by playerViewModel.currentSong.collectAsState()
+
+    // Load starred albums & artists once on entry so favorite state is correct
+    // on detail screens before the user opens the Favorites tab (mirrors iOS).
+    LaunchedEffect(Unit) { likesViewModel.loadStarred() }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Content
         when (selectedTab) {
             0 -> HomeScreen(navController = navController, onMenuClick = { showMenu = true })
             1 -> BrowseScreen(navController = navController, onMenuClick = { showMenu = true })
-            2 -> LikedSongsScreen(navController = navController, onMenuClick = { showMenu = true })
+            2 -> FavoritesScreen(navController = navController, onMenuClick = { showMenu = true })
             3 -> SearchScreen(navController = navController, onMenuClick = { showMenu = true })
         }
 
@@ -116,7 +122,7 @@ fun SmashSonicTabBar(
         ) {
             TabIcon(R.drawable.pixel_home, "Home", selectedTab == 0) { onTabSelect(0) }
             TabIcon(R.drawable.pixel_browse, "Browse", selectedTab == 1) { onTabSelect(1) }
-            TabIcon(R.drawable.pixel_heart, "Liked", selectedTab == 2) { onTabSelect(2) }
+            TabIcon(R.drawable.pixel_heart, "Favorites", selectedTab == 2) { onTabSelect(2) }
             TabIcon(R.drawable.pixel_search, "Search", selectedTab == 3) { onTabSelect(3) }
             TabIcon(R.drawable.pixel_queue, "Queue", false, isAction = true) { onQueueTap() }
             TabIcon(R.drawable.pixel_random, "Random", false, isAction = true) { onRandomTap() }
@@ -169,7 +175,7 @@ fun MenuContent(
         Text("Navigation", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp))
         MenuRow(R.drawable.pixel_home, "Home") { onNavigate(0) }
         MenuRow(R.drawable.pixel_browse, "Browse") { onNavigate(1) }
-        MenuRow(R.drawable.pixel_heart, "Liked Songs") { onNavigate(2) }
+        MenuRow(R.drawable.pixel_heart, "Favorites") { onNavigate(2) }
         MenuRow(R.drawable.pixel_search, "Search") { onNavigate(3) }
 
         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
