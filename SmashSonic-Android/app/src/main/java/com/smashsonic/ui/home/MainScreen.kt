@@ -116,8 +116,9 @@ fun SmashSonicTabBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
+                .navigationBarsPadding()
                 .padding(horizontal = 8.dp)
-                .padding(bottom = 20.dp, top = 8.dp),
+                .padding(bottom = 8.dp, top = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             TabIcon(R.drawable.pixel_home, "Home", selectedTab == 0) { onTabSelect(0) }
