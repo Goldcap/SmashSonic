@@ -22,7 +22,7 @@ class SettingsRepository @Inject constructor(
     private val backgroundKey = stringPreferencesKey("background_type")
 
     val backgroundType: Flow<BackgroundType> = context.dataStore.data.map { prefs ->
-        val key = prefs[backgroundKey] ?: BackgroundType.SOLID_CYAN.key
+        val key = prefs[backgroundKey] ?: BackgroundType.NONE.key
         BackgroundType.fromKey(key)
     }
 
