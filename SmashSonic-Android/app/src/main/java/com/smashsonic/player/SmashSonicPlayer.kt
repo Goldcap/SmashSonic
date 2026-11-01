@@ -3,6 +3,7 @@ package com.smashsonic.player
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.MediaItem
+import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.datasource.okhttp.OkHttpDataSource
@@ -92,6 +93,10 @@ class SmashSonicPlayer @OptIn(UnstableApi::class) @Inject constructor(
     private val randomSongsToAdd = 10
     private var positionUpdateJob: Job? = null
 
+    // Guards against a bad run of tracks spinning forever; reset on any successful load.
+    private var consecutiveErrors = 0
+    private val maxConsecutiveErrors = 5
+
     private var localFileResolver: ((String) -> String?)? = null
 
     fun setLocalFileResolver(resolver: (String) -> String?) {
@@ -107,6 +112,7 @@ class SmashSonicPlayer @OptIn(UnstableApi::class) @Inject constructor(
             when (playbackState) {
                 Player.STATE_READY -> {
                     _isLoading.value = false
+                    consecutiveErrors = 0
                     val dur = exoPlayer.duration
                     if (dur > 0) {
                         _duration.value = dur
@@ -118,6 +124,39 @@ class SmashSonicPlayer @OptIn(UnstableApi::class) @Inject constructor(
                 Player.STATE_BUFFERING -> _isLoading.value = true
                 Player.STATE_ENDED -> handlePlaybackEnded()
                 Player.STATE_IDLE -> {}
+            }
+        }
+
+        override fun onPlayerError(error: PlaybackException) {
+            // A single track failing (bad/unreachable stream, transient network drop)
+            // must not silently kill playback. Skip forward past the failed track so a
+            // random/shuffle/queue session keeps going.
+            consecutiveErrors++
+            if (consecutiveErrors > maxConsecutiveErrors) {
+                _isLoading.value = false
+                _isPlaying.value = false
+                return
+            }
+            skipFailedTrack()
+        }
+    }
+
+    private fun skipFailedTrack() {
+        when {
+            _currentIndex.value < _queue.value.size - 1 -> {
+                next()
+                checkAndReplenishQueue()
+            }
+            _autoAddRandomSongs.value -> {
+                scope.launch {
+                    addRandomSongsToQueue()
+                    if (_currentIndex.value < _queue.value.size - 1) next()
+                    else { _isLoading.value = false; _isPlaying.value = false }
+                }
+            }
+            else -> {
+                _isLoading.value = false
+                _isPlaying.value = false
             }
         }
     }

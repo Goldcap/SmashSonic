@@ -1,12 +1,13 @@
 package com.smashsonic.ui.browse
 
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
@@ -17,12 +18,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.smashsonic.R
 import com.smashsonic.data.model.Album
 import com.smashsonic.data.model.Song
 import com.smashsonic.data.remote.SubsonicUrlBuilder
@@ -33,6 +32,10 @@ import com.smashsonic.ui.downloads.DownloadsViewModel
 import com.smashsonic.ui.home.HomeScreenUrlHelper
 import com.smashsonic.ui.likes.LikesViewModel
 import com.smashsonic.ui.player.PlayerViewModel
+import com.smashsonic.ui.theme.AccentYellow
+import com.smashsonic.ui.theme.Cyan
+import com.smashsonic.ui.theme.DarkBackground
+import com.smashsonic.ui.theme.Magenta
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -116,24 +119,47 @@ fun AlbumDetailScreen(
                                 displayAlbum.songCount?.let { Text("$it tracks", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)) }
                             }
 
-                            // Play/Shuffle/Download buttons
+                            // Play / Shuffle / Download — readable 8-bit text buttons
                             if (sortedSongs.isNotEmpty()) {
-                                Spacer(Modifier.height(16.dp))
+                                Spacer(Modifier.height(20.dp))
                                 Row(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    modifier = Modifier.height(44.dp),
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                                 ) {
-                                    IconButton(onClick = { playerViewModel.play(sortedSongs.first(), sortedSongs) }) {
-                                        Image(painterResource(R.drawable.pixel_play_button), "Play", modifier = Modifier.fillMaxSize())
+                                    Button(
+                                        onClick = { playerViewModel.play(sortedSongs.first(), sortedSongs) },
+                                        modifier = Modifier.weight(1f).height(48.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = Cyan,
+                                            contentColor = DarkBackground,
+                                        ),
+                                    ) {
+                                        Text("PLAY", style = MaterialTheme.typography.labelLarge, maxLines = 1)
                                     }
-                                    IconButton(onClick = {
-                                        val shuffled = sortedSongs.shuffled()
-                                        playerViewModel.play(shuffled.first(), shuffled)
-                                    }) {
-                                        Image(painterResource(R.drawable.pixel_shuffle_button), "Shuffle", modifier = Modifier.fillMaxSize())
+                                    OutlinedButton(
+                                        onClick = {
+                                            val shuffled = sortedSongs.shuffled()
+                                            playerViewModel.play(shuffled.first(), shuffled)
+                                        },
+                                        modifier = Modifier.weight(1f).height(48.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp),
+                                        border = BorderStroke(2.dp, Magenta),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Magenta),
+                                    ) {
+                                        Text("SHUFFLE", style = MaterialTheme.typography.labelLarge, maxLines = 1)
                                     }
-                                    IconButton(onClick = { /* TODO: download all */ }) {
-                                        Image(painterResource(R.drawable.pixel_download_button), "Download", modifier = Modifier.fillMaxSize())
+                                    OutlinedButton(
+                                        onClick = { sortedSongs.forEach { downloadsViewModel.download(it) } },
+                                        modifier = Modifier.height(48.dp),
+                                        shape = RoundedCornerShape(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 14.dp),
+                                        border = BorderStroke(2.dp, AccentYellow),
+                                        colors = ButtonDefaults.outlinedButtonColors(contentColor = AccentYellow),
+                                    ) {
+                                        Icon(Icons.Default.Download, contentDescription = "Download all", modifier = Modifier.size(20.dp))
                                     }
                                 }
                             }
