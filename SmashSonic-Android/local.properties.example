@@ -1,0 +1,8 @@
+# Copy to local.properties (git-ignored) and fill in real values.
+# Android SDK location:
+sdk.dir=/path/to/Android/Sdk
+
+# Release signing secrets (do NOT commit real values).
+# Alternatively provide these as environment variables for CI.
+RELEASE_STORE_PASSWORD=your_keystore_password
+RELEASE_KEY_PASSWORD=your_key_password

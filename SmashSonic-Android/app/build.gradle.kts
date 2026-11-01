@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -6,6 +8,16 @@ plugins {
     alias(libs.plugins.hilt)
     alias(libs.plugins.room)
 }
+
+// Release signing secrets are kept OUT of version control. They are read from
+// local.properties (git-ignored) or, failing that, environment variables (for CI).
+// See README / local.properties.example for the expected keys.
+val keystoreProperties = Properties().apply {
+    val f = rootProject.file("local.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+fun signingSecret(name: String): String =
+    keystoreProperties.getProperty(name) ?: System.getenv(name) ?: ""
 
 android {
     namespace = "com.smashsonic"
@@ -22,9 +34,9 @@ android {
     signingConfigs {
         create("release") {
             storeFile = file("../smashsonic-release.jks")
-            storePassword = "yf8H7L4Ng6UkAGCGpsa5"
+            storePassword = signingSecret("RELEASE_STORE_PASSWORD")
             keyAlias = "smashsonic"
-            keyPassword = "yf8H7L4Ng6UkAGCGpsa5"
+            keyPassword = signingSecret("RELEASE_KEY_PASSWORD")
         }
     }
 
