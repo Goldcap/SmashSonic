@@ -2,7 +2,11 @@ package com.smashsonic.player
 
 import android.content.Context
 import androidx.annotation.OptIn
+import android.net.Uri
+import androidx.media3.common.AudioAttributes
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
+import androidx.media3.common.MediaMetadata
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
@@ -50,6 +54,17 @@ class SmashSonicPlayer @OptIn(UnstableApi::class) @Inject constructor(
         ExoPlayer.Builder(context)
             .setMediaSourceFactory(mediaSourceFactory)
             .setHandleAudioBecomingNoisy(true)
+            // Keep the CPU + Wi-Fi awake while streaming so playback continues when the
+            // screen is off / the app is backgrounded.
+            .setWakeMode(C.WAKE_MODE_NETWORK)
+            // Route as music and let ExoPlayer manage audio focus (pause on calls, etc.).
+            .setAudioAttributes(
+                AudioAttributes.Builder()
+                    .setUsage(C.USAGE_MEDIA)
+                    .setContentType(C.AUDIO_CONTENT_TYPE_MUSIC)
+                    .build(),
+                /* handleAudioFocus = */ true,
+            )
             .build().also { player ->
                 player.addListener(playerListener)
             }
@@ -194,11 +209,17 @@ class SmashSonicPlayer @OptIn(UnstableApi::class) @Inject constructor(
             return
         }
 
-        val mediaItem = if (localPath != null) {
-            MediaItem.fromUri("file://$localPath")
-        } else {
-            MediaItem.fromUri(url)
-        }
+        val artworkUri = song.coverArt?.let { urlBuilder.coverArtUrl(it) }?.let { Uri.parse(it) }
+        val metadata = MediaMetadata.Builder()
+            .setTitle(song.title)
+            .setArtist(song.artist)
+            .setAlbumTitle(song.album)
+            .apply { artworkUri?.let { setArtworkUri(it) } }
+            .build()
+        val mediaItem = MediaItem.Builder()
+            .setUri(if (localPath != null) "file://$localPath" else url)
+            .setMediaMetadata(metadata)
+            .build()
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
         exoPlayer.playWhenReady = true
