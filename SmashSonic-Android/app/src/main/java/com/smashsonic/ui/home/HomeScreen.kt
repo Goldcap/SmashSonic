@@ -146,7 +146,7 @@ fun AlbumSection(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(title, style = MaterialTheme.typography.headlineMedium)
+            Text(title, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary)
             if (showRefresh) {
                 IconButton(onClick = onRefresh) {
                     Icon(Icons.Default.Refresh, contentDescription = "Refresh")
@@ -205,7 +205,7 @@ fun PlaylistSection(
     urlBuilder: SubsonicUrlBuilder,
 ) {
     Column(modifier = Modifier.padding(vertical = 12.dp)) {
-        Text(title, style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(horizontal = 16.dp))
+        Text(title, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 16.dp))
         Spacer(Modifier.height(12.dp))
         playlists.forEach { playlist ->
             PlaylistRow(

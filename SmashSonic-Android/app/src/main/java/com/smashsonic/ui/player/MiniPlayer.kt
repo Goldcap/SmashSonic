@@ -44,6 +44,9 @@ fun MiniPlayer(
     Surface(
         modifier = Modifier.fillMaxWidth().clickable(onClick = onTap),
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        // Explicit bright content colour: a surface with an alpha-modified colour can't
+        // auto-resolve one, so icons/text would otherwise fall back to black.
+        contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 4.dp,
     ) {
         Column {
