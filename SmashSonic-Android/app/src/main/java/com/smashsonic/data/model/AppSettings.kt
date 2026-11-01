@@ -45,10 +45,10 @@ enum class BackgroundType(val key: String, val displayName: String) {
         val pixelArtBackgrounds = listOf(STARS, NOTES, GRID, SPACE)
 
         fun fromKey(key: String): BackgroundType =
-            entries.find { it.key == key } ?: SOLID_CYAN
+            entries.find { it.key == key } ?: NONE
     }
 }
 
 data class AppSettings(
-    val backgroundType: BackgroundType = BackgroundType.SOLID_CYAN,
+    val backgroundType: BackgroundType = BackgroundType.NONE,
 )

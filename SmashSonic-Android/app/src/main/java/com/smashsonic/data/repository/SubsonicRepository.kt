@@ -67,19 +67,45 @@ class SubsonicRepository @Inject constructor(
     }
 
     suspend fun star(songId: String) {
-        val response = api.star(songId)
+        val response = api.star(id = songId)
         checkError(response)
     }
 
     suspend fun unstar(songId: String) {
-        val response = api.unstar(songId)
+        val response = api.unstar(id = songId)
         checkError(response)
+    }
+
+    suspend fun starAlbum(albumId: String) {
+        checkError(api.star(albumId = albumId))
+    }
+
+    suspend fun unstarAlbum(albumId: String) {
+        checkError(api.unstar(albumId = albumId))
+    }
+
+    suspend fun starArtist(artistId: String) {
+        checkError(api.star(artistId = artistId))
+    }
+
+    suspend fun unstarArtist(artistId: String) {
+        checkError(api.unstar(artistId = artistId))
     }
 
     suspend fun getStarred(): List<Song> {
         val response = api.getStarred2()
         checkError(response)
         return response.subsonicResponse.starred2?.song?.map { it.toModel() } ?: emptyList()
+    }
+
+    /** Full starred albums & artists from the server (source of truth for those). */
+    suspend fun getStarredAlbumsAndArtists(): Pair<List<Album>, List<Artist>> {
+        val response = api.getStarred2()
+        checkError(response)
+        val starred = response.subsonicResponse.starred2
+        val albums = starred?.album?.map { it.toModel() } ?: emptyList()
+        val artists = starred?.artist?.map { it.toModel() } ?: emptyList()
+        return albums to artists
     }
 
     suspend fun getRandomSongs(size: Int = 50): List<Song> {

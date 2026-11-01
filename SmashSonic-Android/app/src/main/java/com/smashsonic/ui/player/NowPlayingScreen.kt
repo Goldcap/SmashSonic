@@ -165,7 +165,9 @@ fun NowPlayingScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(currentTimeFormatted, style = MaterialTheme.typography.labelSmall, color = Color.White, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
+                    val leftLabel = if (isSeeking) playerViewModel.formatTime((seekPosition * duration).toLong())
+                                    else currentTimeFormatted
+                    Text(leftLabel, style = MaterialTheme.typography.labelSmall, color = Color.White, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                     Text(durationFormatted, style = MaterialTheme.typography.labelSmall, color = Color.White, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace)
                 }
             }

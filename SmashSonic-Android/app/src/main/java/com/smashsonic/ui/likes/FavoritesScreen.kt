@@ -3,35 +3,42 @@ package com.smashsonic.ui.likes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.smashsonic.R
 import com.smashsonic.data.local.LikedSongEntity
+import com.smashsonic.data.model.Album
+import com.smashsonic.data.model.Artist
 import com.smashsonic.data.remote.SubsonicUrlBuilder
 import com.smashsonic.ui.components.CoverArtImage
 import com.smashsonic.ui.components.SmashSonicBackground
 import com.smashsonic.ui.home.HomeScreenUrlHelper
+import com.smashsonic.ui.navigation.Route
 import com.smashsonic.ui.player.PlayerViewModel
 import com.smashsonic.util.formattedDuration
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LikedSongsScreen(
+fun FavoritesScreen(
     navController: NavController,
     onMenuClick: () -> Unit,
     viewModel: LikesViewModel = hiltViewModel(),
@@ -39,14 +46,18 @@ fun LikedSongsScreen(
     urlBuilder: SubsonicUrlBuilder = hiltViewModel<HomeScreenUrlHelper>().urlBuilder,
 ) {
     val likedSongs by viewModel.likedSongs.collectAsState()
+    val starredAlbums by viewModel.starredAlbums.collectAsState()
+    val starredArtists by viewModel.starredArtists.collectAsState()
     val currentSong by playerViewModel.currentSong.collectAsState()
     val isSyncing by viewModel.isSyncing.collectAsState()
+
+    val hasAnyFavorites = likedSongs.isNotEmpty() || starredAlbums.isNotEmpty() || starredArtists.isNotEmpty()
 
     SmashSonicBackground {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Liked Songs") },
+                    title = { Text("Favorites") },
                     actions = {
                         if (likedSongs.isNotEmpty() || isSyncing) {
                             var showMenu by remember { mutableStateOf(false) }
@@ -96,53 +107,172 @@ fun LikedSongsScreen(
             },
             containerColor = Color.Transparent,
         ) { padding ->
-            if (likedSongs.isEmpty()) {
-                Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Image(
-                            painter = painterResource(R.drawable.pixel_heart),
-                            contentDescription = null,
-                            modifier = Modifier.size(64.dp),
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text("No Liked Songs", style = MaterialTheme.typography.headlineMedium)
-                        Text(
-                            "Songs you like will appear here.\nUse the menu to sync from server.",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        )
-                    }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize().padding(padding),
-                    contentPadding = PaddingValues(vertical = 8.dp),
-                ) {
-                    item {
-                        Row(
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                        ) {
-                            Text("${likedSongs.size} songs", style = MaterialTheme.typography.labelLarge)
-                            if (isSyncing) {
-                                CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+            PullToRefreshBox(
+                isRefreshing = isSyncing,
+                onRefresh = { viewModel.syncFromServer() },
+                modifier = Modifier.fillMaxSize().padding(padding),
+            ) {
+                if (!hasAnyFavorites) {
+                    EmptyFavorites()
+                } else {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(vertical = 8.dp),
+                    ) {
+                        // Artists
+                        if (starredArtists.isNotEmpty()) {
+                            item { SectionHeader("Artists") }
+                            item {
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    items(starredArtists, key = { it.id }) { artist ->
+                                        FavoriteArtistChip(
+                                            artist = artist,
+                                            coverArtUrl = artist.coverArt?.let { urlBuilder.coverArtUrl(it, 200) },
+                                            onClick = { navController.navigate(Route.ArtistDetail.create(artist.id)) },
+                                        )
+                                    }
+                                }
                             }
                         }
-                    }
-                    items(likedSongs, key = { it.id }) { likedSong ->
-                        LikedSongRow(
-                            likedSong = likedSong,
-                            isPlaying = currentSong?.id == likedSong.id,
-                            coverArtUrl = likedSong.coverArt?.let { urlBuilder.coverArtUrl(it, 100) },
-                            onClick = {
-                                val songs = likedSongs.map { it.toSong() }
-                                playerViewModel.play(likedSong.toSong(), songs)
-                            },
-                            onUnlike = { viewModel.unlike(likedSong.id) },
-                        )
+
+                        // Albums
+                        if (starredAlbums.isNotEmpty()) {
+                            item { SectionHeader("Albums") }
+                            item {
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                ) {
+                                    items(starredAlbums, key = { it.id }) { album ->
+                                        FavoriteAlbumCard(
+                                            album = album,
+                                            coverArtUrl = album.coverArt?.let { urlBuilder.coverArtUrl(it, 300) },
+                                            onClick = { navController.navigate(Route.AlbumDetail.create(album.id)) },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Songs
+                        if (likedSongs.isNotEmpty()) {
+                            item { SectionHeader("${likedSongs.size} songs") }
+                            items(likedSongs, key = { it.id }) { likedSong ->
+                                LikedSongRow(
+                                    likedSong = likedSong,
+                                    isPlaying = currentSong?.id == likedSong.id,
+                                    coverArtUrl = likedSong.coverArt?.let { urlBuilder.coverArtUrl(it, 100) },
+                                    onClick = {
+                                        val songs = likedSongs.map { it.toSong() }
+                                        playerViewModel.play(likedSong.toSong(), songs)
+                                    },
+                                    onUnlike = { viewModel.unlike(likedSong.id) },
+                                )
+                            }
+                        }
+
+                        item { Spacer(Modifier.height(100.dp)) }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun SectionHeader(text: String) {
+    Text(
+        text,
+        style = MaterialTheme.typography.labelLarge,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+    )
+}
+
+@Composable
+private fun EmptyFavorites() {
+    // Scrollable so PullToRefreshBox still receives the pull gesture when empty.
+    Box(
+        Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.fillMaxWidth().padding(32.dp),
+        ) {
+            Image(
+                painter = painterResource(R.drawable.pixel_heart),
+                contentDescription = null,
+                modifier = Modifier.size(64.dp),
+            )
+            Spacer(Modifier.height(8.dp))
+            Text("No Favorites Yet", style = MaterialTheme.typography.headlineMedium)
+            Text(
+                "Artists, albums, and songs you favorite\nwill appear here. Pull down to sync from server.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
+fun FavoriteArtistChip(
+    artist: Artist,
+    coverArtUrl: String?,
+    onClick: () -> Unit,
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.width(96.dp).clickable(onClick = onClick),
+    ) {
+        CoverArtImage(
+            url = coverArtUrl,
+            modifier = Modifier.size(96.dp).clip(RoundedCornerShape(48.dp)),
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            artist.name,
+            style = MaterialTheme.typography.labelMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            textAlign = TextAlign.Center,
+        )
+    }
+}
+
+@Composable
+fun FavoriteAlbumCard(
+    album: Album,
+    coverArtUrl: String?,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier.width(140.dp).clickable(onClick = onClick),
+    ) {
+        CoverArtImage(
+            url = coverArtUrl,
+            modifier = Modifier.size(140.dp).clip(RoundedCornerShape(8.dp)),
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            album.name,
+            style = MaterialTheme.typography.bodyMedium,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
+        album.artist?.let {
+            Text(
+                it,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
         }
     }
 }
