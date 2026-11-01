@@ -136,6 +136,8 @@ data class SearchResultDto(
 @JsonClass(generateAdapter = true)
 data class StarredDto(
     val song: List<SongDto>? = null,
+    val album: List<AlbumDto>? = null,
+    val artist: List<ArtistDto>? = null,
 )
 
 // Random Songs

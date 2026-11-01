@@ -14,7 +14,6 @@ import com.smashsonic.ui.browse.AlbumDetailScreen
 import com.smashsonic.ui.browse.ArtistDetailScreen
 import com.smashsonic.ui.browse.PlaylistDetailScreen
 import com.smashsonic.ui.downloads.DownloadsScreen
-import com.smashsonic.ui.likes.LikedSongsScreen
 import com.smashsonic.ui.home.MainScreen
 import com.smashsonic.ui.player.NowPlayingScreen
 import com.smashsonic.ui.player.QueueScreen

@@ -7,6 +7,8 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,6 +49,7 @@ fun AlbumDetailScreen(
     var album by remember { mutableStateOf<Album?>(null) }
     val currentSong by playerViewModel.currentSong.collectAsState()
     val likedSongIds by likesViewModel.likedSongIds.collectAsState()
+    val starredAlbumIds by likesViewModel.starredAlbumIds.collectAsState()
 
     LaunchedEffect(albumId) {
         album = viewModel.loadAlbum(albumId)
@@ -64,6 +67,18 @@ fun AlbumDetailScreen(
                     navigationIcon = {
                         IconButton(onClick = onBack) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
+                    },
+                    actions = {
+                        album?.let { a ->
+                            val isStarred = a.id in starredAlbumIds
+                            IconButton(onClick = { likesViewModel.toggleAlbumStar(a) }) {
+                                Icon(
+                                    if (isStarred) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                                    contentDescription = if (isStarred) "Unfavorite album" else "Favorite album",
+                                    tint = if (isStarred) Color.Red else MaterialTheme.colorScheme.onSurface,
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
