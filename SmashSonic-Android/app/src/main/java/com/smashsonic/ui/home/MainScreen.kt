@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -18,13 +19,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.smashsonic.R
+import com.smashsonic.ui.browse.AlbumDetailScreen
+import com.smashsonic.ui.browse.ArtistDetailScreen
 import com.smashsonic.ui.browse.BrowseScreen
+import com.smashsonic.ui.browse.PlaylistDetailScreen
 import com.smashsonic.ui.components.SmashSonicBackground
 import com.smashsonic.ui.likes.LikedSongsScreen
 import com.smashsonic.ui.navigation.Route
 import com.smashsonic.ui.player.MiniPlayer
+import com.smashsonic.ui.player.NowPlayingScreen
 import com.smashsonic.ui.player.PlayerViewModel
+import com.smashsonic.ui.player.QueueScreen
 import com.smashsonic.ui.search.SearchScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,34 +44,96 @@ fun MainScreen(
     navController: NavController,
     playerViewModel: PlayerViewModel = hiltViewModel(),
 ) {
-    var selectedTab by remember { mutableIntStateOf(0) }
+    // Inner NavHost for detail/full-screen content (album, artist, playlist, now playing,
+    // queue). Routing these through a SEPARATE controller means opening them overlays the
+    // tab content instead of replacing it, so the tab screens (Home etc.) are never
+    // disposed and returning is instant rather than a multi-second rebuild.
+    // Settings/Downloads still use the OUTER navController. See [[android-back-nav-stall]].
+    val contentNav = rememberNavController()
+
+    var selectedTab by rememberSaveable { mutableIntStateOf(0) }
     var showMenu by remember { mutableStateOf(false) }
     val currentSong by playerViewModel.currentSong.collectAsState()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // Content
-        when (selectedTab) {
-            0 -> HomeScreen(navController = navController, onMenuClick = { showMenu = true })
-            1 -> BrowseScreen(navController = navController, onMenuClick = { showMenu = true })
-            2 -> LikedSongsScreen(navController = navController, onMenuClick = { showMenu = true })
-            3 -> SearchScreen(navController = navController, onMenuClick = { showMenu = true })
-        }
+        // ---- Persistent tab layer (never disposed by detail navigation) ----
+        Box(modifier = Modifier.fillMaxSize()) {
+            when (selectedTab) {
+                0 -> HomeScreen(navController = contentNav, onMenuClick = { showMenu = true })
+                1 -> BrowseScreen(navController = contentNav, onMenuClick = { showMenu = true })
+                2 -> LikedSongsScreen(navController = contentNav, onMenuClick = { showMenu = true })
+                3 -> SearchScreen(navController = contentNav, onMenuClick = { showMenu = true })
+            }
 
-        // Mini player + Tab bar at bottom
-        Column(
-            modifier = Modifier.align(Alignment.BottomCenter),
-        ) {
-            if (currentSong != null) {
-                MiniPlayer(
-                    onTap = { navController.navigate(Route.NowPlaying.route) },
+            // Mini player + Tab bar at bottom
+            Column(
+                modifier = Modifier.align(Alignment.BottomCenter),
+            ) {
+                if (currentSong != null) {
+                    MiniPlayer(
+                        onTap = { contentNav.navigate(Route.NowPlaying.route) },
+                    )
+                }
+                SmashSonicTabBar(
+                    selectedTab = selectedTab,
+                    onTabSelect = { selectedTab = it },
+                    onRandomTap = { playerViewModel.startRandomPlayback() },
+                    onQueueTap = { contentNav.navigate(Route.Queue.route) },
                 )
             }
-            SmashSonicTabBar(
-                selectedTab = selectedTab,
-                onTabSelect = { selectedTab = it },
-                onRandomTap = { playerViewModel.startRandomPlayback() },
-                onQueueTap = { navController.navigate(Route.Queue.route) },
-            )
+        }
+
+        // ---- Detail overlay layer: pushed on top of the tab layer ----
+        NavHost(
+            navController = contentNav,
+            startDestination = Route.ContentRoot.route,
+        ) {
+            // Transparent root: the tab layer behind shows through and stays interactive.
+            composable(Route.ContentRoot.route) {}
+
+            composable(
+                route = Route.AlbumDetail.route,
+                arguments = listOf(navArgument("albumId") { type = NavType.StringType }),
+            ) { entry ->
+                val albumId = entry.arguments?.getString("albumId") ?: return@composable
+                AlbumDetailScreen(
+                    albumId = albumId,
+                    navController = contentNav,
+                    onBack = { contentNav.popBackStack() },
+                )
+            }
+
+            composable(
+                route = Route.ArtistDetail.route,
+                arguments = listOf(navArgument("artistId") { type = NavType.StringType }),
+            ) { entry ->
+                val artistId = entry.arguments?.getString("artistId") ?: return@composable
+                ArtistDetailScreen(
+                    artistId = artistId,
+                    navController = contentNav,
+                    onBack = { contentNav.popBackStack() },
+                )
+            }
+
+            composable(
+                route = Route.PlaylistDetail.route,
+                arguments = listOf(navArgument("playlistId") { type = NavType.StringType }),
+            ) { entry ->
+                val playlistId = entry.arguments?.getString("playlistId") ?: return@composable
+                PlaylistDetailScreen(
+                    playlistId = playlistId,
+                    navController = contentNav,
+                    onBack = { contentNav.popBackStack() },
+                )
+            }
+
+            composable(Route.NowPlaying.route) {
+                NowPlayingScreen(onBack = { contentNav.popBackStack() })
+            }
+
+            composable(Route.Queue.route) {
+                QueueScreen(onBack = { contentNav.popBackStack() })
+            }
         }
     }
 
@@ -81,7 +154,7 @@ fun MainScreen(
                 },
                 onQueueTap = {
                     showMenu = false
-                    navController.navigate(Route.Queue.route)
+                    contentNav.navigate(Route.Queue.route)
                 },
                 onDownloads = {
                     showMenu = false
