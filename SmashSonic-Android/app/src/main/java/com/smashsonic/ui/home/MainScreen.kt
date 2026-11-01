@@ -184,6 +184,7 @@ fun SmashSonicTabBar(
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface.copy(alpha = 0.9f),
+        contentColor = MaterialTheme.colorScheme.onSurface,
         tonalElevation = 8.dp,
     ) {
         Row(

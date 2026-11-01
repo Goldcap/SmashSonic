@@ -17,7 +17,7 @@ class BackgroundViewModel @Inject constructor(
 ) : ViewModel() {
 
     val backgroundType: StateFlow<BackgroundType> = settingsRepository.backgroundType
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BackgroundType.NONE)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), BackgroundType.GRID)
 
     fun setBackgroundType(type: BackgroundType) {
         viewModelScope.launch {

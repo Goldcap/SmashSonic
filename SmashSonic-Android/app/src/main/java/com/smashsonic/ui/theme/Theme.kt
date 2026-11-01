@@ -13,8 +13,11 @@ private val DarkColorScheme = darkColorScheme(
     surfaceVariant = DarkSurfaceVariant,
     onPrimary = DarkBackground,
     onSecondary = DarkBackground,
-    onBackground = LightGray,
-    onSurface = LightGray,
+    onTertiary = DarkBackground,
+    // Bright, high-contrast text everywhere by default.
+    onBackground = TextPrimary,
+    onSurface = TextPrimary,
+    onSurfaceVariant = TextSecondary,
     error = AccentRed,
 )
 
