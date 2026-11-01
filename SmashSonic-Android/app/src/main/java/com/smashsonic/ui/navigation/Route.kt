@@ -3,6 +3,11 @@ package com.smashsonic.ui.navigation
 sealed class Route(val route: String) {
     data object ServerSetup : Route("server_setup")
     data object Main : Route("main")
+
+    // Transparent start destination of the inner content NavHost inside MainScreen.
+    // While it is current, the persistent tab layer shows through; detail screens are
+    // pushed on top of it so navigating in/out never disposes the tab content.
+    data object ContentRoot : Route("content_root")
     data object Home : Route("home")
     data object Browse : Route("browse")
     data object Search : Route("search")

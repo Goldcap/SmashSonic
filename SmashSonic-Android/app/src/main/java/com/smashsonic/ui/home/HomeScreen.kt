@@ -158,7 +158,7 @@ fun AlbumSection(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            items(albums) { album ->
+            items(albums, key = { it.id }) { album ->
                 AlbumCard(
                     album = album,
                     coverArtUrl = album.coverArt?.let { urlBuilder.coverArtUrl(it) },

@@ -1,15 +1,12 @@
 package com.smashsonic.ui.components
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import coil3.compose.AsyncImage
-import coil3.compose.SubcomposeAsyncImage
 import com.smashsonic.R
 
 private val placeholders = listOf(
@@ -26,7 +23,7 @@ fun PlaceholderArt(modifier: Modifier = Modifier) {
         painter = painterResource(imageRes),
         contentDescription = "Placeholder",
         contentScale = ContentScale.Crop,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier,
     )
 }
 
@@ -36,15 +33,21 @@ fun CoverArtImage(
     contentDescription: String? = null,
     modifier: Modifier = Modifier,
 ) {
+    // Use AsyncImage (a plain Layout), NOT SubcomposeAsyncImage. SubcomposeAsyncImage
+    // runs composition inside the measure pass, and nested in lazy lists that re-measure
+    // their children it produces hundreds of subcompositions per frame — a multi-second,
+    // CPU-bound measure stall on low-end devices. Painter-based placeholder/error keeps
+    // the retro fallback without the subcomposition cost.
+    val fallback = painterResource(remember(url) { placeholders.random() })
     if (url != null) {
-        SubcomposeAsyncImage(
+        AsyncImage(
             model = url,
             contentDescription = contentDescription,
             contentScale = ContentScale.Crop,
             modifier = modifier,
-            error = {
-                PlaceholderArt(modifier)
-            },
+            placeholder = fallback,
+            error = fallback,
+            fallback = fallback,
         )
     } else {
         PlaceholderArt(modifier)
