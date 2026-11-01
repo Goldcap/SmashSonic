@@ -50,5 +50,5 @@ enum class BackgroundType(val key: String, val displayName: String) {
 }
 
 data class AppSettings(
-    val backgroundType: BackgroundType = BackgroundType.NONE,
+    val backgroundType: BackgroundType = BackgroundType.GRID,
 )
